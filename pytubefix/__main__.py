@@ -148,7 +148,7 @@ class YouTube:
 
         # Shared between all instances of `Stream` (Borg pattern).
         self.stream_monostate = Monostate(
-            on_progress=on_progress_callback, on_complete=on_complete_callback
+            on_progress=on_progress_callback, on_complete=on_complete_callback, youtube=self
         )
 
         if proxies:
@@ -265,8 +265,8 @@ class YouTube:
         try:
             self._pot = bot_guard.generate_po_token(visitor_data=self.visitor_data)
             logger.debug('PoToken generated successfully')
-        except (FileNotFoundError, CalledProcessError):
-            logger.warning('Unable to run botGuard. Skipping poToken generation')
+        except Exception as e:
+            logger.warning('Unable to run botGuard. Skipping poToken generation, reason: ' + e.__str__())
         return self._pot
 
     @property
@@ -347,6 +347,8 @@ class YouTube:
             video = Stream(
                 stream=stream,
                 monostate=self.stream_monostate,
+                po_token=self.po_token,
+                video_playback_ustreamer_config=self.video_playback_ustreamer_config
             )
             self._fmt_streams.append(video)
 
@@ -448,6 +450,29 @@ class YouTube:
                 }
             }
         return self._signature_timestamp
+
+    @property
+    def video_playback_ustreamer_config(self):
+        return self.vid_info[
+            'playerConfig'][
+            'mediaCommonConfig'][
+            'mediaUstreamerRequestConfig'][
+            'videoPlaybackUstreamerConfig']
+
+    @property
+    def server_abr_streaming_url(self):
+        """
+        Extract the url for abr server and decrypt the `n` parameter
+        """
+        try:
+            url = self.vid_info[
+                'streamingData'][
+                'serverAbrStreamingUrl']
+            stream_manifest = [{"url": url}]
+            extract.apply_signature(stream_manifest, vid_info=self.vid_info, js=self.js, url_js=self.js_url)
+            return stream_manifest[0]["url"]
+        except Exception:
+            return None
 
     @property
     def vid_info(self):
@@ -580,7 +605,15 @@ class YouTube:
         :rtype: List[Caption]
         """
 
-        innertube_response = InnerTube(client='WEB').player(self.video_id)
+        innertube_response = InnerTube(
+            client='WEB' if not self.use_oauth else self.client,
+            use_oauth=self.use_oauth,
+            allow_cache=self.allow_oauth_cache,
+            token_file=self.token_file,
+            oauth_verifier=self.oauth_verifier,
+            use_po_token=self.use_po_token,
+            po_token_verifier=self.po_token_verifier
+        ).player(self.video_id)
 
         raw_tracks = (
             innertube_response.get("captions", {})
@@ -609,7 +642,7 @@ class YouTube:
                 'decoratedPlayerBarRenderer']['decoratedPlayerBarRenderer']['playerBar'][
                 'multiMarkersPlayerBarRenderer']['markersMap']
             for marker in markers_map:
-                if marker['key'].upper() == 'DESCRIPTION_CHAPTERS':
+                if marker['key'].upper() == 'DESCRIPTION_CHAPTERS' or marker['key'].upper() == 'AUTO_CHAPTERS':
                     chapters_data = marker['value']['chapters']
                     break
         except (KeyError, IndexError):

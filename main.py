@@ -1,19 +1,19 @@
 import platform
-import ffmpeg # ffmpeg.py
+import ffmpeg    # ffmpeg.py
 import pytubefix
 import downloads # downloads.py
 import os
 
 try:
-    system = platform.system() # Detect the OS.
-    ffmpeg.check_installation(system) # Check if ffmpeg is installed (required).
+    system = platform.system()        # Detect the operating we are running on.
+    ffmpeg.check_installation(system) # Check if ffmpeg is installed on this device (required).
 
     while True:
         url = input("YouTube video link: ")
-        youtube_video = pytubefix.YouTube(url) # Fetch the video with pytubefix.
+        youtube_video = pytubefix.YouTube(url) # Fetch the YouTube video with pytubefix.
         print("Fetching the data of the video..")
 
-        # Fetch informations.
+        # Fetch video information all at once.
         title = youtube_video.title
         thumbnail = youtube_video.thumbnail_url
         author = youtube_video.author
@@ -21,31 +21,33 @@ try:
         restriction = youtube_video.age_restricted
         views = youtube_video.views
 
-        print(f"\nVideo info:\n- Title: \"{title}\"\n- Thumbnail: {thumbnail}\n- Author: {author} ({url})\n- 18+: {"Yes" if restriction == True else "No"}\n- Views count: {views} views")
+        print(f"\nVideo info:\n- Title: \"{title}\".\n- Thumbnail URL: {thumbnail}.\n- Author: {author} ({url}).\n- Age restricted: {"Yes" if restriction == True else "No"}.\n- Views count: {views} views.")
         print("\nWhat do you want to download?\n1) The full video.\n2) The audio only.\n3) The thumbnail.")
 
         while True:
             download = input("\nNumber of the option: ")
 
             if download == "1":
-                downloads.download_video(youtube_video, system);
-                break # We leave the loop once it's done.
+                downloads.download_video(youtube_video, system); # Download the entire YouTube video option.
+                break
             elif download == "2":
-                downloads.download_audio(youtube_video);
+                downloads.download_audio(youtube_video);         # Download the YouTube video audio only option.
                 break
             elif download == "3":
-                downloads.download_thumbnail(thumbnail, title);
+                downloads.download_thumbnail(thumbnail, title);  # Download the YouTube video thumbnail option.
                 break
             else:
-                print(f"Please, try again!", end = "\n\n") # Bad option.
+                print(f"Please, try again!", end = "\n\n")
 
         restart = input("Ready for an another download? (y/n) ")
 
         if not restart.lower() == "y":
             print("Bye!")
-            break # End the program
+            break # End the program.
 
-        os.system("cls" if system == "Windows" else "clear") # Clear the terminal.
+        # Clear the terminal depending on the operating system we are running on.
+        os.system("cls" if system == "Windows" else "clear")
 except Exception as err:
-    print(f"\nThe program crashed!\nError: {err}", end = "\n\n")
+    # Crash handler.
+    print(f"\nThe program has crashed! Error: {err}", end = "\n\n")
     input("Press [Enter] to close the program..")
