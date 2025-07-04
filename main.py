@@ -1,3 +1,4 @@
+import config    # config.py
 import platform
 import ffmpeg    # ffmpeg.py
 import pytubefix
@@ -5,6 +6,9 @@ import downloads # downloads.py
 import os
 
 try:
+    config.load_config_file()         # Load the config.json file data.
+    app_config = config.get_config_data() # Retrieve the configuration.
+
     system = platform.system()        # Detect the operating we are running on.
     ffmpeg.check_installation(system) # Check if ffmpeg is installed on this device (required).
 
@@ -20,6 +24,10 @@ try:
         channel = youtube_video.channel_url
         restriction = youtube_video.age_restricted
         views = youtube_video.views
+
+        if restriction == True and app_config.get("block_age_restricted_content") == True:
+            print("You can't download this YouTube video because it's age restricted!\nTo disable the age restricted content blockage, update your config.json file!")
+            pass
 
         print(f"\nVideo info:\n- Title: \"{title}\".\n- Thumbnail URL: {thumbnail}.\n- Author: {author} ({url}).\n- Age restricted: {"Yes" if restriction == True else "No"}.\n- Views count: {views} views.")
         print("\nWhat do you want to download?\n1) The full video.\n2) The audio only.\n3) The thumbnail.")
