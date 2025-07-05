@@ -1,3 +1,8 @@
 .vscode/
 __pycache__/
 bin/
+ffmpeg.exe
+ffmpeg
+ffmpeg.zip
+./ffmpeg-master-latest-win64-gpl
+./prebuilt-binaries
