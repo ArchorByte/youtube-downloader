@@ -6,7 +6,7 @@ import downloads # downloads.py
 import os
 
 try:
-    config.load_config_file()         # Load the config.json file data.
+    config.load_config_file()             # Load the config.json file data.
     app_config = config.get_config_data() # Retrieve the configuration.
 
     system = platform.system()        # Detect the operating we are running on.

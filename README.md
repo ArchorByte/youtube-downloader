@@ -6,6 +6,7 @@ This Python program can run on Windows, Linux, MacOS and even Android!
 # 📦 Requirements
 - Python interpreter (**3.7+ recommended**).
 - Internet connection ;-).
+- FFmpeg (__**the program handles it automatically**__).
 
 # 📥 Installation
 1) Download the program. <br/>

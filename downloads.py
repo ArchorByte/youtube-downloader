@@ -20,11 +20,13 @@ default_download_path = default_config_path if os.path.exists(default_config_pat
 request.default_range_size = app_config.get("pytube_range_size_bytes", 1024 * 1024) # Amount in bytes of data to download before triggering the progress callback.
 max_retries = app_config.get("max_download_retries", 10)                            # Amount of retries allowed on download failure before aborting.
 
+
+
 # Input to select a folder.
 def folder_input():
     while True:
         folder = input("File location (enter nothing to select the default path): ")
-        folder = folder if folder else default_download_path # Take the input (if specified) or take the program path.
+        folder = folder if folder else default_download_path # Take the input (if specified) or select the default path.
 
         if not os.path.isdir(folder):
             print("This folder doesn't exist! Please, try again!", end = "\n\n")
@@ -106,6 +108,10 @@ def download_video(youtube_video, system):
     elif os.path.exists("/system/build.prop"): # Android systems.
         ffmpeg = "./ffmpeg"
 
+    # Remove the output file if it already exists.
+    if os.path.exists("output.mp4"):
+        os.remove("output.mp4")
+
     # Use ffmpeg to assemble the video source file and the audio source file.
     subprocess.run([ffmpeg, "-y", "-i", "video_source.mp4", "-i", f"audio_source.{extension}", "-c:v", "copy", "-c:a", "aac", "output.mp4"], check = True)
     title = re.sub(r"[<>:\"/\\|?*]", "", youtube_video.title) # Remove invalid characters from the video title.
@@ -117,6 +123,12 @@ def download_video(youtube_video, system):
     # Delete source files because we no longer need them.
     os.remove("video_source.mp4")
     os.remove(f"audio_source.{extension}")
+
+    full_path = os.path.join(download_directory, f"{title}.mp4")
+
+    # Remove the video file that has the same title if it already exists.
+    if os.path.exists(full_path):
+        os.remove(full_path)
 
     # Rename the "output.mp4" file with the video title.
     os.rename("output.mp4", f"{title}.mp4")
@@ -138,10 +150,14 @@ def download_audio(youtube_video):
 
     youtube_video.register_on_progress_callback(download_progress) # Get the download progress data.
     extension = audio.mime_type.split("/")[-1]                     # Retrieve the audio file extension.
+    title = re.sub(r"[<>:\"/\\|?*]", "", youtube_video.title)      # Remove invalid characters from the video title.
+    full_path = os.path.join(download_directory, f"{title}.{extension}")
 
-    title = re.sub(r"[<>:\"/\\|?*]", "", youtube_video.title)                                                      # Remove invalid characters from the video title.
+    # Remove the audio file that has the same title if it already exists.
+    if os.path.exists(full_path):
+        os.remove(full_path)
+
     audio.download(filename = f"{title}.{extension}", output_path = download_directory, max_retries = max_retries) # Download the audio file.
-
     print(f"\n\nDownload finished: \"{os.path.join(download_directory, f"{title}")}.{extension}\"")
 
 
@@ -173,6 +189,11 @@ def download_thumbnail(thumbnail, title):
         # Create a new file.
         with open(f"{title}.png", "wb") as file:
             file.write(http_request.content) # Write the request data into a file.
+            full_path = os.path.join(download_directory, f"{title}.png")
+
+            # Remove the image file that has the same title if it already exists.
+            if os.path.exists(full_path):
+                os.remove(full_path)
 
             # Move the file in the folder selected by the user if specified.
             if not download_directory == default_download_path:
