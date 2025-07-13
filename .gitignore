@@ -4,5 +4,11 @@ bin/
 ffmpeg.exe
 ffmpeg
 ffmpeg.zip
-./ffmpeg-master-latest-win64-gpl
-./prebuilt-binaries
+ffmpeg-master-latest-win64-gpl/
+prebuilt-binaries/
+certifi-*/
+charset_normalizer-*/
+idna-*/
+pytubefix-*/
+requests-*/
+urllib3-*/

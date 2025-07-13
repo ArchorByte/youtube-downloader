@@ -52,6 +52,20 @@ def display_resolutions(youtube_video):
 
 
 
+# Get and display all available subtitle languages of a YouTube video.
+def display_subtitles_list(youtube_video):
+    available_subtitles = []
+    show_subtitles = ""
+
+    for subtitle in youtube_video.captions:
+        show_subtitles = f"{show_subtitles}\n- '{subtitle.code}' for {subtitle.name}"
+        available_subtitles.append(subtitle.code)
+
+    print(f"\nAvailable subtitle languages: {show_subtitles}", end = "\n\n")
+    return available_subtitles
+
+
+
 # Download an entire YouTube video (video + audio).
 def download_video(youtube_video, system):
     download_directory = folder_input()
@@ -72,10 +86,10 @@ def download_video(youtube_video, system):
         if not resolution.endswith("p"):
             resolution += "p"
 
-        if resolution not in available_resolutions: # Invalid resolution entered.
+        if resolution not in available_resolutions:
             print(f"Unavailable resolution! Please, try again.", end = "\n\n")
         else:
-            print("\nPreparing your download.. Download speed depends on your internet connection.");
+            print("\nPreparing your download.. Download speed depends on your internet connection.")
             break
 
     # To bypass the limitation, we are going to download the video and its audio separately.
@@ -97,9 +111,10 @@ def download_video(youtube_video, system):
         os.remove(f"audio_source.{extension}")
 
     video.download(filename = "video_source.mp4", max_retries = max_retries) # Download the video source.
+    print()
     audio.download(filename = f"audio_source.{extension}", max_retries = max_retries) # Download the audio source.
 
-    print("\nAssembling audio and video..", end = "\n\n")
+    print("\n\nAssembling audio and video..")
     ffmpeg = "ffmpeg" # Default command.
 
     # Change the command depending on the operating system.
@@ -146,7 +161,7 @@ def download_audio(youtube_video):
     download_directory = folder_input()
 
     audio = youtube_video.streams.filter(only_audio = True).order_by("abr").desc().first() # Select the audio of the video that has the best bitrate.
-    print("Preparing your download.. Download speed depends on your internet connection.")
+    print("\nPreparing your download.. Download speed depends on your internet connection.")
 
     youtube_video.register_on_progress_callback(download_progress) # Get the download progress data.
     extension = audio.mime_type.split("/")[-1]                     # Retrieve the audio file extension.
@@ -158,7 +173,7 @@ def download_audio(youtube_video):
         os.remove(full_path)
 
     audio.download(filename = f"{title}.{extension}", output_path = download_directory, max_retries = max_retries) # Download the audio file.
-    print(f"\n\nDownload finished: \"{os.path.join(download_directory, f"{title}")}.{extension}\"")
+    print(f"Download finished: \"{os.path.join(download_directory, f"{title}")}.{extension}\"")
 
 
 
@@ -176,30 +191,67 @@ def download_progress(stream, chunk, remaining):
 
 
 
+# Download the subtitles of a YouTube video.
+def download_subtitles(youtube_video):
+    download_directory = folder_input()
+    available_subtitles = display_subtitles_list(youtube_video)
+
+    if len(available_subtitles) < 1:
+        print("No subtitles available for this video!")
+        return
+
+    while True:
+        lang = input("Choose a subtitle language: ")
+
+        if lang not in available_subtitles:
+            print(f"Unavailable language! Please, try again.", end = "\n\n")
+        else:
+            print("\nPreparing your download.. Download speed depends on your internet connection.");
+            break
+
+    subtitle = youtube_video.captions[lang]
+    subtitle_data = subtitle.generate_srt_captions()
+    title = re.sub(r"[<>:\"/\\|?*]", "", youtube_video.title) # Removing invalid characters from the video title.
+    full_path = os.path.join(download_directory, f"{title}.srt")
+
+    if os.path.exists(full_path):
+        os.remove(full_path)
+
+    with open(f"{title}.srt", "w") as file:
+        file.write(subtitle_data)
+        file.close()
+
+    if not download_directory == default_download_path:
+        shutil.move(f"./{title}.srt", download_directory)
+
+    print(f"Download finished: \"{os.path.join(download_directory, f"{title}.srt")}\"")
+
+
+
 # Download the thumbnail of a YouTube video.
 def download_thumbnail(thumbnail, title):
     download_directory = folder_input()
 
-    print("Preparing your download.. Download speed depends on your internet connection.")
+    print("\nPreparing your download.. Download speed depends on your internet connection.")
     http_request = requests.get(thumbnail) # Try to retrieve the thumbnail data.
 
     if http_request.status_code == 200:
         title = re.sub(r"[<>:\"/\\|?*]", "", title) # Removing invalid characters from the video title.
+        full_path = os.path.join(download_directory, f"{title}.png")
+
+        # Remove the image file that has the same title if it already exists.
+        if os.path.exists(full_path):
+            os.remove(full_path)
 
         # Create a new file.
         with open(f"{title}.png", "wb") as file:
             file.write(http_request.content) # Write the request data into a file.
-            full_path = os.path.join(download_directory, f"{title}.png")
-
-            # Remove the image file that has the same title if it already exists.
-            if os.path.exists(full_path):
-                os.remove(full_path)
 
             # Move the file in the folder selected by the user if specified.
             if not download_directory == default_download_path:
                 shutil.move(f"./{title}.png", download_directory)
 
             file.close() # Free the file.
-            print(f"\nDownload finished: \"{os.path.join(download_directory, f"{title}")}.png\"")
+            print(f"Download finished: \"{os.path.join(download_directory, f"{title}")}.png\"")
     else:
         print(f"\nRequest failed with code {http_request.status_code}.")

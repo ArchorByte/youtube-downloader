@@ -6,12 +6,13 @@ This Python program can run on Windows, Linux, MacOS and even Android!
 # 📦 Requirements
 - Python interpreter (**3.7+ recommended**).
 - Internet connection ;-).
-- FFmpeg (__**the program handles it automatically**__).
+- FFmpeg (**the program handles it automatically**).
 
 # 📥 Installation
 1) Download the program. <br/>
-2) Run the program using `python main.py` <br/>
-3) Enjoy!
+2) Check for libraries updates (**update.bat** / **update.sh**). <br/>
+3) Run the program using `python main.py` <br/>
+4) Enjoy!
 
 # ⚙️ Configuration
 You can configure the program using the `config.json` file. <br/>
