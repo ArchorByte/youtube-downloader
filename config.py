@@ -8,6 +8,7 @@ config = {
     "pytube_range_size_bytes": 1048576, # 1 MB (1024 * 1024).
     "default_download_destination": "./",
     "default_download_resolution": "1080p",
+    "default_subtitle_lang": "a.en",
     "block_age_restricted_content": False
 }
 
@@ -18,6 +19,7 @@ config_schema = {
     "pytube_range_size_bytes": int,
     "default_download_destination": str,
     "default_download_resolution": str,
+    "default_subtitle_lang": str,
     "block_age_restricted_content": bool
 }
 
