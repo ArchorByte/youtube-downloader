@@ -2,32 +2,22 @@ import json
 import os
 
 # Default config file content.
-# We use it as base to avoid to have missing keys in case the config.json file is incomplete.
+# We use it as a base to avoid to have missing keys in case the config.json file is incomplete or any unexpected keys.
+# We use it to check the types in the config.json file as well.
 config = {
     "max_download_retries": 10,
     "pytube_range_size_bytes": 1048576, # 1 MB (1024 * 1024).
     "default_download_destination": "./",
     "default_download_resolution": "1080p",
-    "default_subtitle_lang": "a.en",
+    "default_subtitle_lang": "a.en",    # English (auto generated).
     "block_age_restricted_content": False
-}
-
-# Schema of the config content.
-# It contains the expected types for the config data.
-config_schema = {
-    "max_download_retries": int,
-    "pytube_range_size_bytes": int,
-    "default_download_destination": str,
-    "default_download_resolution": str,
-    "default_subtitle_lang": str,
-    "block_age_restricted_content": bool
 }
 
 
 
 # Check the type of the input to prevent exploits or invalid type inputs.
 def check_input(key, data):
-    type = config_schema[key]
+    type = type(config[key])
     return isinstance(data, type) # Return true if the types match.
 
 

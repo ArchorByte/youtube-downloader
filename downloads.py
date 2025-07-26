@@ -5,6 +5,7 @@ import requests
 import re
 import shutil
 from pytubefix import request
+import time
 
 app_config = config.get_config_data()                                      # Retrieve config data.
 default_config_path = app_config.get("default_download_destination", "./") # Default configured download path.
@@ -46,6 +47,15 @@ def remove_if_exists(path):
 
 
 
+# Remove invalid characters for a file name from an input.
+def remove_invalid_characters(input):
+    output = re.sub(r"[<>:\"/\\|?*]", "", input)
+    output = output if output else "A very cool video" # Check that there the output is not empty.
+
+    return output
+
+
+
 # Get and display all available resolutions of a YouTube video.
 def display_resolutions(youtube_video):
     available_resolutions = []
@@ -75,6 +85,25 @@ def display_subtitles_list(youtube_video):
 
     print(f"\nAvailable subtitle languages: {show_subtitles}", end = "\n\n")
     return available_subtitles
+
+
+
+# Download streams with an attempts system.
+def download_stream(stream, filename):
+    i = 0
+
+    while (i < max_retries):
+        try:
+            stream.download(filename = filename, max_retries = max_retries)
+            return True
+        except Exception as error:
+            print(f"\nDownload attempt {i + 1}/{max_retries} failed with error {error}!")
+            remove_if_exists(filename) # Remove the created file before resuming.
+            time.sleep(3)              # Wait 3 seconds before trying again.
+
+        i += 1
+
+    return False
 
 
 
@@ -111,16 +140,16 @@ def download_video(youtube_video, system):
     video = youtube_video.streams.filter(resolution = resolution, only_video = True).first() # Select the video source.
     audio = youtube_video.streams.filter(only_audio = True).order_by("abr").desc().first()   # Select the audio source that has the best bitrate.
 
-    youtube_video.register_on_progress_callback(download_progress) # Get the download progress data.
-    extension = audio.mime_type.split("/")[-1]                     # Retrieve the audio file extension.
+    # Get the download progress data.
+    youtube_video.register_on_progress_callback(download_progress)
 
     remove_if_exists("video_source.mp4")
-    remove_if_exists(f"audio_source.{extension}")
+    remove_if_exists("audio_source.mp3")
     remove_if_exists("output.mp4")
 
-    video.download(filename = "video_source.mp4", max_retries = max_retries)          # Download the video source.
-    print()                                                                           # Separate the two progression bars.
-    audio.download(filename = f"audio_source.{extension}", max_retries = max_retries) # Download the audio source.
+    download_stream(video, "video_source.mp4") # Download the video source.
+    print()                                    # Separate the two progression bars.
+    download_stream(audio, "audio_source.mp3") # Download the audio source.
 
     print("\n\nAssembling audio and video..")
     ffmpeg = "ffmpeg" # Default command (Linux + MacOS systems).
@@ -132,24 +161,19 @@ def download_video(youtube_video, system):
         ffmpeg = "./ffmpeg"
 
     # Use ffmpeg to assemble the video source file and the audio source file.
-    subprocess.run([ffmpeg, "-y", "-i", "video_source.mp4", "-i", f"audio_source.{extension}", "-c:v", "copy", "-c:a", "aac", "output.mp4"], check = True)
-
-    title = re.sub(r"[<>:\"/\\|?*]", "", youtube_video.title) # Remove invalid characters from the video title.
-    full_path = os.path.join(download_directory, f"{title}.mp4")
-
-    # If the invalid characters removal emptied the video title, we replace it.
-    if not title:
-        title = "A very cool video"
+    subprocess.run([ffmpeg, "-y", "-i", "video_source.mp4", "-i", "audio_source.mp3", "-c:v", "copy", "-c:a", "aac", "output.mp4"], check = True)
+    title = remove_invalid_characters(youtube_video.title)
 
     # Delete source files because we no longer need them.
     remove_if_exists("video_source.mp4")
-    remove_if_exists(f"audio_source.{extension}")
+    remove_if_exists("audio_source.mp3")
 
+    full_path = os.path.join(download_directory, f"{title}.mp4")
     remove_if_exists(full_path)
     os.rename("output.mp4", f"{title}.mp4") # Rename the "output.mp4" file with the video title.
 
     # Move the file in the folder selected by the user if specified.
-    if not download_directory == default_download_path:
+    if not download_directory == "./":
         shutil.move(f"./{title}.mp4", download_directory)
 
     print(f"\nDownload finished: \"{full_path}\"")
@@ -164,14 +188,17 @@ def download_audio(youtube_video):
     print("\nPreparing your download.. Download speed depends on your internet connection.")
 
     youtube_video.register_on_progress_callback(download_progress) # Get the download progress data.
-    extension = audio.mime_type.split("/")[-1]                     # Retrieve the audio file extension.
-    title = re.sub(r"[<>:\"/\\|?*]", "", youtube_video.title)      # Remove invalid characters from the video title.
-    full_path = os.path.join(download_directory, f"{title}.{extension}")
+    title = remove_invalid_characters(youtube_video.title)         # Remove invalid characters from the video title.
+    full_path = os.path.join(download_directory, f"{title}.mp3")
 
     remove_if_exists(full_path)
-    audio.download(filename = f"{title}.{extension}", output_path = download_directory, max_retries = max_retries) # Download the audio file.
+    download_stream(audio, f"{title}.mp3") # Download the audio file.
 
-    print(f"Download finished: \"{full_path}\"")
+    # Move the file in the folder selected by the user if specified.
+    if not download_directory == "./":
+        shutil.move(f"{title}.mp3", download_directory)
+
+    print(f"\nDownload finished: \"{full_path}\"")
 
 
 
@@ -214,7 +241,7 @@ def download_subtitles(youtube_video):
     subtitle = youtube_video.captions[lang]         # Retrieve the subtitle using the language code.
     subtitle_srt = subtitle.generate_srt_captions() # Get the subtitles in SRT format.
 
-    title = re.sub(r"[<>:\"/\\|?*]", "", youtube_video.title) # Removing invalid characters from the video title.
+    title = remove_invalid_characters(youtube_video.title) # Removing invalid characters from the video title.
     full_path = os.path.join(download_directory, f"{title}.srt")
 
     remove_if_exists(f"{title}.srt")
@@ -226,7 +253,7 @@ def download_subtitles(youtube_video):
         file.close() # Free the file.
 
     # Move the file in the folder selected by the user if specified.
-    if not download_directory == default_download_path:
+    if not download_directory == "./":
         shutil.move(f"./{title}.srt", download_directory)
 
     print(f"Download finished: \"{full_path}\"")
@@ -241,7 +268,7 @@ def download_thumbnail(thumbnail, title):
     http_request = requests.get(thumbnail) # Try to retrieve the thumbnail data.
 
     if http_request.status_code == 200:
-        title = re.sub(r"[<>:\"/\\|?*]", "", title) # Removing invalid characters from the video title.
+        title = remove_invalid_characters(title) # Removing invalid characters from the video title.
         full_path = os.path.join(download_directory, f"{title}.png")
 
         remove_if_exists(f"{title}.png")
@@ -252,7 +279,7 @@ def download_thumbnail(thumbnail, title):
             file.write(http_request.content) # Write the request data into the file.
 
             # Move the file in the folder selected by the user if specified.
-            if not download_directory == default_download_path:
+            if not download_directory == "./":
                 shutil.move(f"./{title}.png", download_directory)
 
             file.close() # Free the file.

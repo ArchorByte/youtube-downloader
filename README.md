@@ -22,7 +22,7 @@ Here are the different options you have:
 - `"pytube_range_size_bytes"` -> Amount in bytes to download to trigger the download callback.
 - `"default_download_destination"` -> Destination path where the program puts the downloaded file by default.
 - `"default_download_resolution"` -> Resolution of the video files by default (if available, otherwise we propose the highest).
-- `default_subtitle_lang` -> Language of the subtitles by default (only proposed if available).
+- `"default_subtitle_lang"` -> Language of the subtitles by default (only proposed if available).
 - `"block_age_restricted_content"` -> Disallow the download of YouTube videos that have age restriction.
 ``` json
 {
