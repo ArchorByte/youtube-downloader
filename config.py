@@ -17,8 +17,8 @@ config = {
 
 # Check the type of the input to prevent exploits or invalid type inputs.
 def check_input(key, data):
-    type = type(config[key])
-    return isinstance(data, type) # Return true if the types match.
+    expected_type = type(config[key])
+    return isinstance(data, expected_type) # Return true if the types match.
 
 
 
