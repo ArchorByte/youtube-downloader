@@ -58,7 +58,7 @@ try:
                 downloads.download_thumbnail(thumbnail, title);  # Download the YouTube video thumbnail option.
                 break
             else:
-                print(f"Please, try again!", end = "\n\n")
+                print("Invalid option! Please, try again.")
 
         restart = input("\nReady for an another download? (y/n) ")
 
