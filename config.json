@@ -1,6 +1,7 @@
 {
     "max_download_retries": 10,
     "pytube_range_size_bytes": 1048576,
+    "default_download_option_number": 1,
     "default_download_destination": "./",
     "default_download_resolution": "1080p",
     "default_subtitle_lang": "a.en",

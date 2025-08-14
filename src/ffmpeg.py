@@ -74,7 +74,6 @@ def check_installation(system):
         sys.exit()
 
 
-
 # Install ffmpeg on Windows devices.
 def windows_installation():
     allowed = input(f"Do you allow the installation of ffmpeg? (y/n) ")
@@ -101,7 +100,6 @@ def windows_installation():
     os.remove("./ffmpeg.zip")                                            # Delete the original zip file.
 
     print("ffmpeg installation completed, enjoy!", end = "\n\n")
-
 
 
 # Install ffmpeg for Android devices.
@@ -132,7 +130,6 @@ def android_installation():
     print("ffmpeg installation completed, enjoy!", end = "\n\n")
 
 
-
 # Download progress callback.
 def download_progress(block_number, block_size, total_size):
     downloaded_bytes = block_number * block_size
@@ -143,7 +140,6 @@ def download_progress(block_number, block_size, total_size):
     bar = "[" + "█" * filled + " " * empty + "]"     # Render the bar.
 
     print(f"\rDownload progress: {percentage:.0f}% {bar} ({downloaded_bytes / 1000000:.2f}MB/{total_size / 1000000:.2f}MB).", end = "", flush = True)
-
 
 
 # Install ffmpeg on Linux devices.
@@ -187,7 +183,6 @@ def linux_installation(package_manager):
         os.system("sudo snap install ffmpeg")
 
     print("ffmpeg installation completed, enjoy!", end = "\n\n")
-
 
 
 # Install ffmpeg on MacOS devices.
