@@ -26,7 +26,7 @@ def display_subtitles_list(youtube_video):
 # The destination can be set to None to let the normal system running.
 # Otherwise, it will automate the download process.
 def download_subtitles(youtube_video, destination):
-    app_config = config.get_config_data()                                   # Retrieve config data.
+    app_config = config.get_config_data()                                   # Retrieve the configured data.
     default_subtitle_lang = app_config.get("default_subtitle_lang", "a.en") # Default configured language for the subtitle downloads.
 
     if destination == None:
@@ -53,8 +53,8 @@ def download_subtitles(youtube_video, destination):
             print("\nPreparing your download.. Download speed depends on your internet connection.");
             break
 
-    subtitle = youtube_video.captions[lang]         # Retrieve the subtitle using the language code.
-    subtitle_srt = subtitle.generate_srt_captions() # Get the subtitles in SRT format.
+    subtitles = youtube_video.captions[lang]         # Retrieve the subtitle using the language code.
+    subtitle_srt = subtitles.generate_srt_captions() # Get the subtitles in SRT format.
 
     title = helpers.remove_invalid_characters(youtube_video.title) # Removing invalid characters from the video title.
     full_path = os.path.join(download_directory, f"{title}.srt")
