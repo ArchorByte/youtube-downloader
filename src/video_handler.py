@@ -9,30 +9,31 @@ import thumbnail_download
 def video_info_scrapper(youtube_video):
     app_config = config.get_config_data()
 
-    title = youtube_video.title
-    id = youtube_video.video_id
-    publication = youtube_video.publish_date.strftime("%B %d %Y at %I:%M %p") # Format date.
-    thumbnail = youtube_video.thumbnail_url
-    author = youtube_video.author
+    video_title = youtube_video.title
+    video_id = youtube_video.video_id
+    publication_date = youtube_video.publish_date.strftime("%B %d %Y at %I:%M %p") # Format date.
+    thumbnail_url = youtube_video.thumbnail_url
+    video_author = youtube_video.author
     channel_url = youtube_video.channel_url
-    restriction = youtube_video.age_restricted
-    views = youtube_video.views
+    age_restricted = youtube_video.age_restricted
+    video_views_count = youtube_video.views
     duration = datetime.timedelta(seconds = youtube_video.length) # Convert the duration from seconds to hours:minutes:seconds.
 
-    if restriction and app_config.get("block_age_restricted_content"):
+    # Block the video download if it's age restricted and disallowed by the config data.
+    if age_restricted and app_config.get("block_age_restricted_content"):
         print("You can't download this YouTube video because it's age restricted!\nTo disable the age restricted content blockage, update your config.json file!")
         input("Press [Enter] to continue.. ")
         pass
 
     print("Video info:")
-    print(f"- Title: \"{title}\".")
-    print(f"- Video ID: {id}.")
-    print(f"- Publication: {publication}.")
-    print(f"- Thumbnail URL: {thumbnail}.")
-    print(f"- Author: {author}.")
+    print(f"- Title: \"{video_title}\".")
+    print(f"- Video ID: {video_id}.")
+    print(f"- Publication: {publication_date}.")
+    print(f"- Thumbnail URL: {thumbnail_url}.")
+    print(f"- Author: {video_author}.")
     print(f"- Channel URL: {channel_url}.")
-    print(f"- Age restricted: {"Yes" if restriction else "No"}.")
-    print(f"- Views count: {views} views.")
+    print(f"- Age restricted: {"Yes" if age_restricted else "No"}.")
+    print(f"- Views count: {video_views_count} views.")
     print(f"- Duration: {duration}.")
 
 

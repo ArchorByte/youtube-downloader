@@ -1,5 +1,11 @@
 import os
 import sys
+import config
+import platform
+import ffmpeg
+import pytubefix
+import video_handler
+import playlist_handler
 
 # Load the dependencies folder to retrieve the bundled libraries.
 # Bundling those dependencies make it "plug-and-play".
@@ -8,18 +14,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "dependencies"))
 # Load the src folder to retrieve the other scripts.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-import config
-import platform
-import ffmpeg
-import pytubefix
-import video_handler
-import playlist_handler
-
 try:
     config.load_config_file()             # Load the config.json file data.
     app_config = config.get_config_data() # Retrieve the configuration.
 
-    # Set up the default range size in bytes for the callback trigger.
+    # Set up the range size in bytes for the pytube download callback trigger.
     range_size_bytes = app_config.get("pytube_range_size_bytes", 1024 * 1024)
     pytubefix.request.default_range_size = range_size_bytes if range_size_bytes >= 1 else 1024 * 1024
 
@@ -31,7 +30,7 @@ try:
     system = platform.system()        # Detect the operating system we are running on.
     ffmpeg.check_installation(system) # Check if ffmpeg is installed on this device (required).
 
-    url = None            # When this variable is set to "None", we give to the user a URL input, otherwise, we use it again.
+    url = None            # When this variable is set to "None", we give to the user a URL input.
     youtube_source = None # This variable saves the latest video data fetched in case the user wants to use this video again.
     source_type = "v"     # This variable has normally two states: "v" for video and "p" for playlist.
 

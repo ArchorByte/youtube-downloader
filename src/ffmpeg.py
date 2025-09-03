@@ -12,6 +12,7 @@ def check_installation(system):
         if not os.path.isfile("./ffmpeg.exe"):
             print("ffmpeg isn't installed!")
             windows_installation()
+
     elif system == "Linux":
         # Android devices.
         if os.path.exists("/system/build.prop"):
@@ -20,10 +21,10 @@ def check_installation(system):
                 print("ffmpeg isn't installed!")
                 android_installation()
 
-        # Linux devices.
+        # Linux desktop/server devices.
         else:
             package_manager = None
-            installed = False
+            ffmpeg_installed = False
 
             # Supported linux package managers.
             commands = {
@@ -33,29 +34,30 @@ def check_installation(system):
                 3: ["snap", "list", "ffmpeg"]   # SNAP package manager.
             }
 
-            # Try each package manager until we find an available package manager.
+            # Try each package manager until we find a valid one.
             for i in range(len(commands)):
                 try:
                     command = commands[i]                                                               # Select a package manager in the commands list.
-                    fetch = subprocess.run(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE) # Try to use the package manager.
+                    request = subprocess.run(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE) # Try to use the package manager.
+
+                    # If the command didn't fail, we select this package manager.
                     package_manager = i
 
-                    # If the command is successful, we select the package manager.
-                    if fetch.returncode == 0:
-                        installed = True
+                    # If the command was successful, ffmpeg is installed.
+                    if request.returncode == 0:
+                        ffmpeg_installed = True
                         break
                 except:
                     print("", end = "")
 
-            # Clear the terminal.
             os.system("clear")
 
             if package_manager == None:
-                # To add your package manager, you can edit the code and make a pull request to https://github.com/archorbyte/youtube-downloader.
+                # To add support for your package manager, you can edit the code and make a pull request to https://github.com/archorbyte/youtube-downloader.
                 print("This program doesn't support your package manager!")
                 input("Press [Enter] to close the program..")
                 sys.exit()
-            elif not installed:
+            elif not ffmpeg_installed:
                 print("ffmpeg isn't installed!")
                 linux_installation(package_manager)
 
@@ -68,6 +70,7 @@ def check_installation(system):
             os.system("clear")
             print("ffmpeg isn't installed!")
             macos_installation()
+
     else:
         # To add your OS, you can edit the code and make a pull request to https://github.com/archorbyte/youtube-downloader.
         print("This program doesn't support your operating system!")
@@ -95,7 +98,7 @@ def windows_installation():
     with zipfile.ZipFile("ffmpeg.zip", "r") as zip:
         zip.extractall("./") # Extract the files.
 
-    shutil.move("./ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe", "./") # Extract the ffmpeg.exe file from the others.
+    shutil.move("./ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe", "./") # Extract the ffmpeg.exe file from the other files.
     shutil.rmtree("./ffmpeg-master-latest-win64-gpl")                    # Delete all other files because we don't need them.
     os.remove("./ffmpeg.zip")                                            # Delete the original zip file.
 
@@ -135,11 +138,11 @@ def download_progress(block_number, block_size, total_size):
     downloaded_bytes = block_number * block_size
     percentage = downloaded_bytes / total_size * 100
 
-    filled = int(20 * downloaded_bytes / total_size) # Calculate the amount of "filled characters" to display in the bar.
-    empty = 20 - filled                              # The rest of the bar is set as whitespaces. The bar is 20 characters whatsoever.
-    bar = "[" + "█" * filled + " " * empty + "]"     # Render the bar.
+    filled = int(20 * downloaded_bytes / total_size)      # Calculate the amount of "filled characters" to display in the bar.
+    empty = 20 - filled                                   # The rest of the bar is set as whitespaces. The bar is 20 characters whatsoever.
+    progress_bar = "[" + "█" * filled + " " * empty + "]" # Render the bar.
 
-    print(f"\rDownload progress: {percentage:.0f}% {bar} ({downloaded_bytes / 1000000:.2f}MB/{total_size / 1000000:.2f}MB).", end = "", flush = True)
+    print(f"\rDownload progress: {percentage:.0f}% {progress_bar} ({downloaded_bytes / 1000000:.2f}MB/{total_size / 1000000:.2f}MB).", end = "", flush = True)
 
 
 # Install ffmpeg on Linux devices.

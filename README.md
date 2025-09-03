@@ -1,5 +1,5 @@
 # Youtube Downloader
-Download YouTube videos for free! <br/>
+Download YouTube videos and playlists for free! <br/>
 This Python program can run on Windows, Linux, MacOS and even Android!
 > **Warning:** VPNs can provoke some unexpected results such as download failures or major slow downs.
 
@@ -20,6 +20,7 @@ The default configuration is available at the bottom of this section. <br/>
 Here are the different options you have:
 - `"max_download_retries"` -> Maximum amount of retries the program does when a download fail, before aborting.
 - `"pytube_range_size_bytes"` -> Amount in bytes to download to trigger the download callback.
+- `"default_download_option_number"` -> Download option we use by default.
 - `"default_download_destination"` -> Destination path where the program puts the downloaded file by default.
 - `"default_download_resolution"` -> Resolution of the video files by default (if available, otherwise we propose the highest).
 - `"default_subtitle_lang"` -> Language of the subtitles by default (only proposed if available).
@@ -28,6 +29,7 @@ Here are the different options you have:
 {
     "max_download_retries": 10,
     "pytube_range_size_bytes": 1048576,
+    "default_download_option_number": 1,
     "default_download_destination": "./",
     "default_download_resolution": "1080p",
     "default_subtitle_lang": "a.en",
