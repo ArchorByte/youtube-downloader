@@ -1,11 +1,5 @@
 import os
 import sys
-import config
-import platform
-import ffmpeg
-import pytubefix
-import video_handler
-import playlist_handler
 
 # Load the dependencies folder to retrieve the bundled libraries.
 # Bundling those dependencies make it "plug-and-play".
@@ -13,6 +7,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "dependencies"))
 
 # Load the src folder to retrieve the other scripts.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
+import config
+import platform
+import ffmpeg
+import pytubefix
+import video_handler
+import playlist_handler
 
 try:
     config.load_config_file()             # Load the config.json file data.
@@ -32,7 +33,7 @@ try:
 
     url = None            # When this variable is set to "None", we give to the user a URL input.
     youtube_source = None # This variable saves the latest video data fetched in case the user wants to use this video again.
-    source_type = "v"     # This variable has normally two states: "v" for video and "p" for playlist.
+    source_type = "v"     # This variable has normally three states: "v" for video and "p" for playlist.
 
     while True:
         if url == None:
@@ -40,10 +41,10 @@ try:
             print("Retrieving information.. This may take a while.", end = "\n\n")
 
             try:
-                youtube_source = pytubefix.YouTube(url)  # Make a query for a YouTube video with the URL.
+                youtube_source = pytubefix.YouTube(url)  # Make a YouTube video query with the URL.
                 source_type = "v"
             except:
-                youtube_source = pytubefix.Playlist(url) # If the query failed, we try to make a query for a playlist instead.
+                youtube_source = pytubefix.Playlist(url) # If the query failed, we try to make a playlist query instead.
                 source_type = "p"
 
         if source_type == "v":
