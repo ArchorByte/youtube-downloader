@@ -52,7 +52,6 @@ def download_video(youtube_video, system, resolution, destination_path):
             if resolution not in available_resolutions:
                 print(f"Unavailable resolution! Please, try again.", end = "\n\n")
             else:
-                print("\nPreparing your download.. Download speed depends on your internet connection.")
                 break
     else:
         if resolution not in available_resolutions:
@@ -74,8 +73,10 @@ def download_video(youtube_video, system, resolution, destination_path):
     helpers.remove_if_exists("audio_source.mp3")
     helpers.remove_if_exists("output.mp4")
 
+    print("\nDownloading video source:\n")
     helpers.download_stream(video_stream, "video_source.mp4") # Download the video source.
-    print()                                                   # Separate the two progression bars.
+
+    print("\n\nDownloading audio source:")
     helpers.download_stream(audio_stream, "audio_source.mp3") # Download the audio source.
 
     print("\n\nAssembling audio and video..")
