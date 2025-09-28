@@ -73,7 +73,7 @@ def download_video(youtube_video, system, resolution, destination_path):
     helpers.remove_if_exists("audio_source.mp3")
     helpers.remove_if_exists("output.mp4")
 
-    print("\nDownloading video source:\n")
+    print("\nDownloading video source:")
     helpers.download_stream(video_stream, "video_source.mp4") # Download the video source.
 
     print("\n\nDownloading audio source:")
