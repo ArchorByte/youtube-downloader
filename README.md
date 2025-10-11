@@ -25,6 +25,7 @@ Here are the different options you have:
 - `"default_download_resolution"` -> Resolution of the video files by default (if available, otherwise we propose the highest).
 - `"default_subtitle_lang"` -> Language of the subtitles by default (only proposed if available).
 - `"block_age_restricted_content"` -> Disallow the download of YouTube videos that have age restriction.
+- `"auto_mp3_conversion"` -> Automatically convert the downloaded audio files to mp3 if necessary.
 ``` json
 {
     "max_download_retries": 10,
@@ -33,7 +34,8 @@ Here are the different options you have:
     "default_download_destination": "./",
     "default_download_resolution": "1080p",
     "default_subtitle_lang": "a.en",
-    "block_age_restricted_content": false
+    "block_age_restricted_content": false,
+    "auto_mp3_conversion": true
 }
 ```
 
