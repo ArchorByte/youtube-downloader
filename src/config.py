@@ -12,7 +12,7 @@ config = {
     "default_download_resolution": "1080p",
     "default_subtitle_lang": "a.en",     # English (auto generated).
     "block_age_restricted_content": False,
-    "default_mp3_conversion": True
+    "auto_mp3_conversion": True
 }
 
 

@@ -32,10 +32,15 @@ def download_audio(youtube_video, destination_path, system):
     helpers.download_stream(audio_stream, f"{sanitized_title}.{file_extension}")
 
     if not file_extension == "mp3" and auto_mp3_conversion:
+        print(end = "\n\n") # Text format.
+
         ffmpeg = helpers.ffmpeg_command_keyword(system)
+        helpers.remove_if_exists(f"./{sanitized_title}.mp3")
+
         subprocess.run([ffmpeg, "-y", "-i", f"{sanitized_title}.{file_extension}", "-ar", "44100", "-ac", "2", "-b:a", "192k",  f"{sanitized_title}.mp3"], check = True)
         helpers.remove_if_exists(full_path)
-        file_extension = "mp3"                   # Retrieve the extension of the audio file.
+
+        file_extension = "mp3"
         full_path = os.path.join(download_directory, f"{sanitized_title}.mp3")
 
     # Move the file in the folder selected by the user if specified.
