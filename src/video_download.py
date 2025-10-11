@@ -80,13 +80,7 @@ def download_video(youtube_video, system, resolution, destination_path):
     helpers.download_stream(audio_stream, "audio_source.mp3") # Download the audio source.
 
     print("\n\nAssembling audio and video..")
-    ffmpeg = "ffmpeg" # Default command (Linux and MacOS systems).
-
-    # Change the command depending on the operating system.
-    if system == "Windows":
-        ffmpeg = "ffmpeg.exe"
-    elif os.path.exists("/system/build.prop"): # Android systems.
-        ffmpeg = "./ffmpeg"
+    ffmpeg = helpers.ffmpeg_command_keyword(system)
 
     # Use ffmpeg to assemble the video source file and the audio source file.
     subprocess.run([ffmpeg, "-y", "-i", "video_source.mp4", "-i", "audio_source.mp3", "-c:v", "copy", "-c:a", "aac", "output.mp4"], check = True)

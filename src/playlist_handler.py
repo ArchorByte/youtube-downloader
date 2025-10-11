@@ -27,7 +27,7 @@ def playlist_info_scrapper(youtube_playlist):
 
 # YouTube playlist download handler.
 def playlist_download_handler(youtube_playlist, option, system):
-    app_config = config.get_config_data() # Retrieve the configured data.
+    app_config = config.get_config_data()
     valid_resolutions = { "144p", "240p", "360p", "480p", "720p", "1080p", "1440p", "2160p" }
     resolution = ""
 
@@ -65,7 +65,7 @@ def playlist_download_handler(youtube_playlist, option, system):
         if option == "1":
             video_download.download_video(youtube_video, system, resolution, destination_path)
         elif option == "2":
-            audio_download.download_audio(youtube_video, destination_path)
+            audio_download.download_audio(youtube_video, destination_path, system)
         elif option == "3":
             subtitles_download.download_subtitles(youtube_video, destination_path)
         else:

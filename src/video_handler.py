@@ -42,7 +42,7 @@ def download_video_handler(youtube_video, option, system):
     if option == "1":
         video_download.download_video(youtube_video, system, None, None)
     elif option == "2":
-        audio_download.download_audio(youtube_video, None)
+        audio_download.download_audio(youtube_video, None, system)
     elif option == "3":
         subtitles_download.download_subtitles(youtube_video, None)
     else:

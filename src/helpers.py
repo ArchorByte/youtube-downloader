@@ -69,3 +69,13 @@ def download_progress(stream, chunk, remaining_bytes):
     progress_bar = "[" + "█" * filled + " " * empty + "]" # Render the bar.
 
     print(f"\rDownload progress: {percentage:.0f}% {progress_bar} ({downloaded_bytes / 1000000:.2f}MB/{file_size / 1000000:.2f}MB).", end = "", flush = True)
+
+
+# Give the ffmpeg keyword to use to start an ffmpeg command, depending on the operating system.
+def ffmpeg_command_keyword(system):
+    if system == "Windows":
+        return "ffmpeg.exe"
+    elif os.path.exists("/system/build.prop"): # Android systems.
+        return "./ffmpeg"
+    else:
+        return "ffmpeg"
