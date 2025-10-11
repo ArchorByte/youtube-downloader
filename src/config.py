@@ -11,7 +11,8 @@ config = {
     "default_download_destination": "./",
     "default_download_resolution": "1080p",
     "default_subtitle_lang": "a.en",     # English (auto generated).
-    "block_age_restricted_content": False
+    "block_age_restricted_content": False,
+    "default_mp3_conversion": True
 }
 
 
