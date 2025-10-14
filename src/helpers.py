@@ -5,13 +5,11 @@ import time
 
 # Input to select a folder with a retry system.
 def folder_input():
-    app_config = config.get_config_data()                                          # Retrieve the configured data.
-    default_configured_path = app_config.get("default_download_destination", "./") # Default configured download path.
+    app_config = config.get_config_data()
+    default_configured_path = app_config.get("default_download_destination", "./")
 
     script_path = os.path.abspath(__file__)       # Detect the path to the main.py script.
-    directory_path = os.path.dirname(script_path) # Determine the path to the program's folder using the script path.
-
-    # Select the main directory if the default configured path is not valid.
+    directory_path = os.path.dirname(script_path) # Determine the path to the program's folder using the main.py path.
     default_download_path = default_configured_path if os.path.exists(default_configured_path) else directory_path
 
     while True:
@@ -31,42 +29,49 @@ def remove_if_exists(file_path):
 
 
 # Remove invalid characters from an input.
-def remove_invalid_characters(input):
-    output = re.sub(r"[<>:\"/\\|?*]", "", input)
-    output = output if output else "A very cool video" # Check the output is not empty.
+def remove_invalid_characters(input_text):
+    output = re.sub(r"[<>:\"/\\|?*]", "", input_text)
+    output = output if output else "A very cool video" # Verify the output.
 
     return output
 
 
 # Download streams with an attempts system.
 def download_stream(stream, file_name):
-    app_config = config.get_config_data()                    # Retrieve the configured data.
-    max_retries = app_config.get("max_download_retries", 10) # Default configured amount of retries before aborting.
-    max_retries = max_retries if max_retries >= 1 and max_retries <= 100 else 10 # We set it to 10 if the configured amount is not valid.
+    app_config = config.get_config_data()
     i = 0
 
-    while (i < max_retries):
+    max_retries = app_config.get("max_download_retries", 10)
+    max_retries = max_retries if max_retries >= 1 and max_retries <= 100 else 10
+
+    retry_cooldown = app_config.get("retry_cooldown", 3)
+    retry_cooldown = retry_cooldown if retry_cooldown >= 0 and retry_cooldown <= 60 else 3
+
+    for i in range(max_retries):
         try:
             stream.download(filename = file_name, max_retries = max_retries)
             return True
         except Exception as error:
             print(f"\nDownload attempt {i + 1}/{max_retries} failed with error {error}!")
             remove_if_exists(file_name) # Remove the created file before resuming.
-            time.sleep(3)               # Wait 3 seconds before trying again.
-        i += 1
+            time.sleep(retry_cooldown)  # Wait before trying again.
 
     return False
 
 
 # Download progress callback handler.
 def download_progress(stream, chunk, remaining_bytes):
+    app_config = config.get_config_data()
+    bar_length = app_config.get("download_bars_length", 20)
+    bar_length = bar_length if bar_length > 0 and bar_length <= 100 else 20
+
     file_size = stream.filesize
     downloaded_bytes = file_size - remaining_bytes
     percentage = downloaded_bytes / file_size * 100
 
-    filled = int(20 * downloaded_bytes / file_size)       # Calculate the amount of "filled characters" to display in the bar.
-    empty = 20 - filled                                   # The rest of the bar is set as whitespaces. The bar is 20 characters long.
-    progress_bar = "[" + "█" * filled + " " * empty + "]" # Render the bar.
+    filled = int(bar_length * downloaded_bytes / file_size) # Calculate the amount of "filled characters" to put in the bar.
+    empty = bar_length - filled                             # The rest of the bar is set as whitespaces.
+    progress_bar = "[" + "█" * filled + " " * empty + "]"   # Render the text bar.
 
     print(f"\rDownload progress: {percentage:.0f}% {progress_bar} ({downloaded_bytes / 1000000:.2f}MB/{file_size / 1000000:.2f}MB).", end = "", flush = True)
 

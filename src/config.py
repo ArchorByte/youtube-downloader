@@ -3,15 +3,17 @@ import os
 
 # Default config file content.
 # We use it as a base to avoid to have missing keys in case the config.json file is incomplete or contain any unexpected keys.
-# We use it to check the types in the config.json file as well for security reasons.
+# We use it to check the types as well for security.
 config = {
     "max_download_retries": 10,
+    "retry_cooldown": 3,
     "pytube_range_size_bytes": 1048576,  # 1 MB (1024 KB * 1024 KB).
+    "download_bars_length": 20,
     "default_download_option_number": 1, # Download full video option.
     "default_download_destination": "./",
     "default_download_resolution": "1080p",
     "default_subtitle_lang": "a.en",     # English (auto generated).
-    "block_age_restricted_content": False,
+    "block_age_restricted_content": True,
     "auto_mp3_conversion": True
 }
 
@@ -24,21 +26,20 @@ def check_input(key, data):
 
 # Load the config file data.
 def load_config_file():
-    # If the config file doesn't exist, we will simply use the default data.
     if not os.path.exists("./config.json"):
         return
 
-    json_file_data = None
+    config_file_data = None
 
     # Read the config.json file in read only mode.
     with open("config.json", "r") as file:
-        json_file_data = json.load(file) # Retrieve the data of the JSON file.
-        file.close()                     # Free the file.
+        config_file_data = json.load(file) # Read file content as JSON.
+        file.close()                       # Free the file.
 
-    # We try to only load from the config.json, the keys listed in the default config.
+    # We try to load from the config.json, only the keys that are listed in the default config.
     for key in config:
-        if key in json_file_data and check_input(key, json_file_data[key]):
-            config[key] = json_file_data[key] # Overwrite the default value configured.
+        if key in config_file_data and check_input(key, config_file_data[key]):
+            config[key] = config_file_data[key] # Overwrite the default value configured.
 
 
 # Simply returns the config data.

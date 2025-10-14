@@ -16,7 +16,6 @@ def download_audio(youtube_video, destination_path, system):
         download_directory = helpers.folder_input()
         print()
     else:
-        # We default to the current folder if the destination folder provided is not valid.
         download_directory = destination_path if os.path.isdir(destination_path) else "./"
 
     # Select the audio of the video that has the best bitrate.
@@ -24,13 +23,14 @@ def download_audio(youtube_video, destination_path, system):
     print("Preparing your download.. This may take a while.")
 
     youtube_video.register_on_progress_callback(helpers.download_progress)   # Get the download progress data.
-    sanitized_title = helpers.remove_invalid_characters(youtube_video.title) # Remove invalid characters from the video title.
+    sanitized_title = helpers.remove_invalid_characters(youtube_video.title)
     file_extension = audio_stream.mime_type.split("/")[-1]                   # Retrieve the extension of the audio file.
     full_path = os.path.join(download_directory, f"{sanitized_title}.{file_extension}")
 
     helpers.remove_if_exists(full_path)
     helpers.download_stream(audio_stream, f"{sanitized_title}.{file_extension}")
 
+    # If necessary and enabled, we automatically make the conversion to mp3.
     if not file_extension == "mp3" and auto_mp3_conversion:
         print(end = "\n\n") # Text format.
 

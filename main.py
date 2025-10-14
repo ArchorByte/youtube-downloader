@@ -2,7 +2,7 @@ import os
 import sys
 
 # Load the dependencies folder to retrieve the bundled libraries.
-# Bundling those dependencies make it "plug-and-play".
+# Bundling those dependencies make it more "plug-and-play".
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "dependencies"))
 
 # Load the src folder to retrieve the other scripts.
@@ -16,8 +16,8 @@ import video_handler
 import playlist_handler
 
 try:
-    config.load_config_file()             # Load the config.json file data.
-    app_config = config.get_config_data() # Retrieve the configuration.
+    config.load_config_file() # Load the config.json file data.
+    app_config = config.get_config_data()
 
     # Set up the range size in bytes for the pytube download callback trigger.
     range_size_bytes = app_config.get("pytube_range_size_bytes", 1024 * 1024)
@@ -32,8 +32,8 @@ try:
     ffmpeg.check_installation(system) # Check if ffmpeg is installed on this device (required).
 
     url = None            # When this variable is set to "None", we give to the user a URL input.
-    youtube_source = None # This variable saves the latest video data fetched in case the user wants to use this video again.
-    source_type = "v"     # This variable has normally three states: "v" for video and "p" for playlist.
+    youtube_source = None # This variable saves the latest video data fetched in case the user wants to reuse it.
+    source_type = "v"     # This variable has normally two states: "v" for video and "p" for playlist.
 
     while True:
         if url == None:
@@ -41,10 +41,10 @@ try:
             print("Retrieving information.. This may take a while.", end = "\n\n")
 
             try:
-                youtube_source = pytubefix.YouTube(url)  # Make a YouTube video query with the URL.
+                youtube_source = pytubefix.YouTube(url)
                 source_type = "v"
             except:
-                youtube_source = pytubefix.Playlist(url) # If the query failed, we try to make a playlist query instead.
+                youtube_source = pytubefix.Playlist(url) # If the previous query failed, we try to make a playlist query instead.
                 source_type = "p"
 
         if source_type == "v":
@@ -76,7 +76,6 @@ try:
 
         reset = input("Do you want to use this video/playlist again? (y/n) ")
 
-        # Clear the previous video data.
         if not reset.lower() == "y":
             url = None
             youtube_video = None
