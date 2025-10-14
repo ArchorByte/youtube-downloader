@@ -9,10 +9,9 @@ def display_subtitles_list(youtube_video):
     show_subtitles = ""
     i = 0
 
-    # Register each subtitle available.
     for subtitle in youtube_video.captions:
-        show_subtitles = f"{show_subtitles}\n- '{subtitle.code}' for {subtitle.name}." # We update our output message to add the language in it.
-        available_subtitles.append(subtitle.code)                                      # We only take the language code in the list.
+        show_subtitles = f"{show_subtitles}\n- '{subtitle.code}' for {subtitle.name}."
+        available_subtitles.append(subtitle.code)
         i += 1
 
     if i == 0:
@@ -26,8 +25,8 @@ def display_subtitles_list(youtube_video):
 # The destination can be set to None to let the normal system running.
 # Otherwise, it will automate the download process.
 def download_subtitles(youtube_video, destination):
-    app_config = config.get_config_data()                                   # Retrieve the configured data.
-    default_subtitle_lang = app_config.get("default_subtitle_lang", "a.en") # Default configured language for the subtitle downloads.
+    app_config = config.get_config_data()
+    default_subtitle_lang = app_config.get("default_subtitle_lang", "a.en")
 
     if destination == None:
         download_directory = helpers.folder_input()
@@ -37,7 +36,6 @@ def download_subtitles(youtube_video, destination):
     available_subtitles = display_subtitles_list(youtube_video)                       # List and display all subtitle languages available.
     default_allowed = True if default_subtitle_lang in available_subtitles else False # Determine if the default subtitle language can be used for this video.
 
-    # If there is no subtitle available for this video, we abort.
     if len(available_subtitles) < 1:
         print("No subtitles available for this video!")
         return
@@ -54,9 +52,9 @@ def download_subtitles(youtube_video, destination):
             break
 
     subtitles = youtube_video.captions[lang]         # Retrieve the subtitle using the language code.
-    subtitle_srt = subtitles.generate_srt_captions() # Get the subtitles in SRT format.
+    subtitle_srt = subtitles.generate_srt_captions() # Get the subtitles in the SRT format.
 
-    title = helpers.remove_invalid_characters(youtube_video.title) # Removing invalid characters from the video title.
+    title = helpers.remove_invalid_characters(youtube_video.title)
     full_path = os.path.join(download_directory, f"{title}.srt")
 
     helpers.remove_if_exists(f"{title}.srt")

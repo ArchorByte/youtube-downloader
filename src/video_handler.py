@@ -19,7 +19,7 @@ def video_info_scrapper(youtube_video):
     video_views_count = youtube_video.views
     duration = datetime.timedelta(seconds = youtube_video.length) # Convert the duration from seconds to hours:minutes:seconds.
 
-    # Block the video download if it's age restricted and disallowed by the config data.
+    # Block the video download if it's age restricted and disallowed by the config.
     if age_restricted and app_config.get("block_age_restricted_content"):
         print("You can't download this YouTube video because it's age restricted!\nTo disable the age restricted content blockage, update your config.json file!")
         input("Press [Enter] to continue.. ")

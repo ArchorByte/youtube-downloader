@@ -11,14 +11,13 @@ def download_thumbnail(thumbnail_url, video_title, destination_path):
         download_directory = helpers.folder_input()
         print()
     else:
-        # We default to the current folder if the destination folder provided is not valid.
         download_directory = destination_path if os.path.isdir(destination_path) else "./"
 
     print("Preparing your download.. This may take a while.")
     http_request = requests.get(thumbnail_url) # Try to retrieve the thumbnail data.
 
     if http_request.status_code == 200:
-        sanitized_title = helpers.remove_invalid_characters(video_title) # Removing invalid characters from the video title.
+        sanitized_title = helpers.remove_invalid_characters(video_title)
         full_path = os.path.join(download_directory, f"{sanitized_title}.png")
 
         helpers.remove_if_exists(f"{sanitized_title}.png")

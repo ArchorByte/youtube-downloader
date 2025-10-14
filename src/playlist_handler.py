@@ -34,8 +34,6 @@ def playlist_download_handler(youtube_playlist, option, system):
     if option == "1":
         print("Valid resolutions (might not be available): 144p, 240p, 360p, 480p, 720p, 1080p, 1440p, 2160p.", end = "\n\n")
 
-        # We select the default download resolution in the config file if it's available.
-        # Otherwise, we select the highest resolution available.
         default_resolution = app_config.get("default_download_resolution", "1080p")
         default_resolution = default_resolution if default_resolution in valid_resolutions else valid_resolutions[-1]
 

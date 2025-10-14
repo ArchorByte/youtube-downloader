@@ -19,7 +19,9 @@ You can configure the program using the `config.json` file. <br/>
 The default configuration is available at the bottom of this section. <br/>
 Here are the different options you have:
 - `"max_download_retries"` -> Maximum amount of retries the program does when a download fail, before aborting.
+- `"retry_cooldown"` -> Amount of time in seconds to wait when a download failed, before trying again.
 - `"pytube_range_size_bytes"` -> Amount in bytes to download to trigger the download callback.
+- `"download_bars_length"` -> Length in characters of the download bars (both FFmpeg and YouTube).
 - `"default_download_option_number"` -> Download option we use by default.
 - `"default_download_destination"` -> Destination path where the program puts the downloaded file by default.
 - `"default_download_resolution"` -> Resolution of the video files by default (if available, otherwise we propose the highest).
@@ -29,7 +31,9 @@ Here are the different options you have:
 ``` json
 {
     "max_download_retries": 10,
+    "retry_cooldown": 3,
     "pytube_range_size_bytes": 1048576,
+    "download_bars_length": 20,
     "default_download_option_number": 1,
     "default_download_destination": "./",
     "default_download_resolution": "1080p",

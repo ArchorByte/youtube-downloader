@@ -1,10 +1,12 @@
 {
     "max_download_retries": 10,
+    "retry_cooldown": 3,
     "pytube_range_size_bytes": 1048576,
+    "download_bars_length": 20,
     "default_download_option_number": 1,
     "default_download_destination": "./",
     "default_download_resolution": "1080p",
     "default_subtitle_lang": "a.en",
-    "block_age_restricted_content": false,
+    "block_age_restricted_content": true,
     "auto_mp3_conversion": true
 }

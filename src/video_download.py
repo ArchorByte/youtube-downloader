@@ -24,20 +24,17 @@ def display_resolutions(youtube_video):
 # The resolution and destination can be set to None to let the normal system running.
 # Otherwise, it will automate the download process.
 def download_video(youtube_video, system, resolution, destination_path):
-    app_config = config.get_config_data() # Retrieve the configured data.
+    app_config = config.get_config_data()
 
     if destination_path == None:
         download_directory = helpers.folder_input()
     else:
-        # We default to the current folder if the destination folder provided is not valid.
         download_directory = destination_path if os.path.isdir(destination_path) else "./"
 
     print("Looking for available resolutions for your video..")
     available_resolutions = display_resolutions(youtube_video) # Display available resolutions.
 
     if resolution == None:
-        # We select the default download resolution in the config file if it's available.
-        # Otherwise, we select the highest resolution available.
         default_resolution = app_config.get("default_download_resolution", "1080p")
         default_resolution = default_resolution if default_resolution in available_resolutions else available_resolutions[-1]
 
@@ -55,7 +52,6 @@ def download_video(youtube_video, system, resolution, destination_path):
                 break
     else:
         if resolution not in available_resolutions:
-            # We select the highest resolution available if the provided resolution is not available.
             resolution = available_resolutions[-1]
 
     # To bypass the YouTube limitations, we are going to download the video and its audio separately.
@@ -68,23 +64,21 @@ def download_video(youtube_video, system, resolution, destination_path):
     # Get the download progress data.
     youtube_video.register_on_progress_callback(helpers.download_progress)
 
-    # Clean up the folder if necessary.
-    helpers.remove_if_exists("video_source.mp4")
-    helpers.remove_if_exists("audio_source.mp3")
-    helpers.remove_if_exists("output.mp4")
-
     print("\nDownloading video source:")
+    helpers.remove_if_exists("video_source.mp4")
     helpers.download_stream(video_stream, "video_source.mp4") # Download the video source.
 
     print("\n\nDownloading audio source:")
+    helpers.remove_if_exists("audio_source.mp3")
     helpers.download_stream(audio_stream, "audio_source.mp3") # Download the audio source.
 
     print("\n\nAssembling audio and video..")
     ffmpeg = helpers.ffmpeg_command_keyword(system)
 
     # Use ffmpeg to assemble the video source file and the audio source file.
+    helpers.remove_if_exists("output.mp4")
     subprocess.run([ffmpeg, "-y", "-i", "video_source.mp4", "-i", "audio_source.mp3", "-c:v", "copy", "-c:a", "aac", "output.mp4"], check = True)
-    sanitized_title = helpers.remove_invalid_characters(youtube_video.title) # Remove invalid characters from the video title.
+    sanitized_title = helpers.remove_invalid_characters(youtube_video.title)
 
     # Delete source files as we no longer need them.
     helpers.remove_if_exists("video_source.mp4")
@@ -92,7 +86,7 @@ def download_video(youtube_video, system, resolution, destination_path):
 
     full_path = os.path.join(download_directory, f"{sanitized_title}.mp4")
     helpers.remove_if_exists(full_path)
-    os.rename("output.mp4", f"{sanitized_title}.mp4") # Rename the "output.mp4" file with the video title.
+    os.rename("output.mp4", f"{sanitized_title}.mp4")
 
     # Move the file in the folder selected by the user if specified.
     if not download_directory == "./":
