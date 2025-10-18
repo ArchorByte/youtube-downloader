@@ -18,16 +18,16 @@ This Python program can run on Windows, Linux, MacOS and even Android!
 You can configure the program using the `config.json` file. <br/>
 The default configuration is available at the bottom of this section. <br/>
 Here are the different options you have:
-- `"max_download_retries"` -> Maximum amount of retries the program does when a download fail, before aborting.
-- `"retry_cooldown"` -> Amount of time in seconds to wait when a download failed, before trying again.
-- `"pytube_range_size_bytes"` -> Amount in bytes to download to trigger the download callback.
-- `"download_bars_length"` -> Length in characters of the download bars (both FFmpeg and YouTube).
-- `"default_download_option_number"` -> Download option we use by default.
+- `"max_download_retries"` -> Maximum amount of retries the program does when a download fail, before aborting (1 ~ 100).
+- `"retry_cooldown"` -> Amount of time in seconds to wait when a download failed, before trying again (0 ~ 60).
+- `"pytube_range_size_bytes"` -> Amount in bytes to download to trigger the download callback (> 0).
+- `"download_bars_length"` -> Length in characters of the download bars (1 ~ 20).
+- `"default_download_option_number"` -> Download option we use by default (1 ~ 4).
 - `"default_download_destination"` -> Destination path where the program puts the downloaded file by default.
 - `"default_download_resolution"` -> Resolution of the video files by default (if available, otherwise we propose the highest).
 - `"default_subtitle_lang"` -> Language of the subtitles by default (only proposed if available).
-- `"block_age_restricted_content"` -> Disallow the download of YouTube videos that have age restriction.
-- `"auto_mp3_conversion"` -> Automatically convert the downloaded audio files to mp3 if necessary.
+- `"block_age_restricted_content"` -> Disallow the download of YouTube videos that have age restriction (true / false).
+- `"auto_mp3_conversion"` -> Automatically convert the downloaded audio files to mp3 if necessary (true / false).
 ``` json
 {
     "max_download_retries": 10,

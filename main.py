@@ -21,12 +21,12 @@ try:
 
     # Set up the range size in bytes for the pytube download callback trigger.
     range_size_bytes = app_config.get("pytube_range_size_bytes", 1024 * 1024)
-    pytubefix.request.default_range_size = range_size_bytes if range_size_bytes >= 1 else 1024 * 1024
+    pytubefix.request.default_range_size = range_size_bytes if range_size_bytes > 0 else 1024 * 1024
 
     # Default download option.
     # We select 1 (full video download option) if the data registered is not valid.
     default_download_option_number = app_config.get("default_download_option_number", 1)
-    default_download_option_number = default_download_option_number if default_download_option_number >= 1 and default_download_option_number <= 4 else 1
+    default_download_option_number = default_download_option_number if default_download_option_number > 0 and default_download_option_number <= 4 else 1
 
     system = platform.system()        # Detect the operating system we are running on.
     ffmpeg.check_installation(system) # Check if ffmpeg is installed on this device (required).
