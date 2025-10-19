@@ -52,7 +52,7 @@ def download_stream(stream, file_name):
             stream.download(filename = file_name, max_retries = max_retries)
             return True
         except Exception as error:
-            print(f"\nDownload attempt {i + 1}/{max_retries} failed with error {error}!")
+            print(f"\nDownload attempt {i + 1}/{max_retries} failed with error {error}!", end = "\n\n")
             remove_if_exists(file_name) # Remove the created file before resuming.
             time.sleep(retry_cooldown)  # Wait before trying again.
 
