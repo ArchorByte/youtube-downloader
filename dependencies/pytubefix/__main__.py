@@ -95,16 +95,6 @@ class YouTube:
             (optional) Verifier to be used for getting oauth tokens. 
             Verification URL and User-Code will be passed to it respectively.
             (if passed, else default verifier will be used)
-        :param bool use_po_token:
-            (Optional) Prompt the user to use the proof of origin token on YouTube.
-            It must be sent with the API along with the linked visitorData and
-            then passed as a `po_token` query parameter to affected clients.
-            If allow_oauth_cache is set to True, the user should only be prompted once.
-            (Do not use together with `use_oauth=True`)
-        :param Callable po_token_verifier:
-            (Optional) Verified used to obtain the visitorData and po_token.
-            The verifier will return the visitorData and po_token respectively.
-            (if passed, else default verifier will be used)
         """
         # js fetched by js_url
         self._js: Optional[str] = None
@@ -135,7 +125,7 @@ class YouTube:
         self.watch_url = f"https://youtube.com/watch?v={self.video_id}"
         self.embed_url = f"https://www.youtube.com/embed/{self.video_id}"
 
-        self.client = 'WEB' if use_po_token else client
+        self.client = client
 
         # oauth can only be used by the TV and TV_EMBED client.
         self.client = 'TV' if use_oauth else self.client
@@ -163,8 +153,14 @@ class YouTube:
         self.token_file = token_file
         self.oauth_verifier = oauth_verifier
 
+
+        # TODO: This does not work, remove poToken manually in the next update
+        # https://github.com/FreeTubeApp/FreeTube/pull/8137
         self.use_po_token = use_po_token
         self.po_token_verifier = po_token_verifier
+
+        if self.use_po_token or self.po_token_verifier:
+            logger.warning("`use_po_token` and `po_token_verifier` is deprecated and will be removed soon.")
 
         self.po_token = None
         self._pot = None
@@ -262,9 +258,8 @@ class YouTube:
         """
         if self._pot:
             return self._pot
-        logger.debug('Invoking botGuard')
+        logger.debug('Running botGuard')
         try:
-            self._pot = bot_guard.generate_po_token(visitor_data=self.visitor_data)
             logger.debug('PoToken generated successfully')
         except Exception as e:
             logger.warning('Unable to run botGuard. Skipping poToken generation, reason: ' + e.__str__())
@@ -389,10 +384,10 @@ class YouTube:
                         'Sign in to your primary account to confirm your age.'
                 ):
                     raise exceptions.AgeCheckRequiredAccountError(video_id=self.video_id)
-                elif reason == (
-                        'The uploader has not made this video available in your country'
-                ):
+                elif reason == ('The uploader has not made this video available in your country'):
                     raise exceptions.VideoRegionBlocked(video_id=self.video_id)
+                elif "blocked it in your country on copyright grounds" in reason:
+                    raise exceptions.VideoBlockedByCopyright(video_id=self.video_id, reason=reason)
                 else:
                     raise exceptions.VideoUnavailable(video_id=self.video_id)
 
@@ -425,9 +420,9 @@ class YouTube:
                 elif reason == 'This video is unavailable':
                     raise exceptions.VideoUnavailable(video_id=self.video_id)
                 elif reason == 'This video has been removed by the uploader':
-                    raise exceptions.VideoUnavailable(video_id=self.video_id)
+                    raise exceptions.VideoRemovedByUploader(video_id=self.video_id, reason=reason)
                 elif reason == 'This video is no longer available because the YouTube account associated with this video has been terminated.':
-                    raise exceptions.VideoUnavailable(video_id=self.video_id)
+                    raise exceptions.AccountTerminated(video_id=self.video_id, reason=reason)
                 else:
                     raise exceptions.UnknownVideoError(video_id=self.video_id, status=status, reason=reason, developer_message=f'Unknown reason type for Error status')
             elif status == 'LIVE_STREAM':
@@ -519,7 +514,7 @@ class YouTube:
             if innertube.require_po_token and not self.use_po_token:
                 logger.debug(f"The {optional_client} client requires poToken to obtain functional streams")
                 logger.debug("Automatically generating poToken")
-                innertube.insert_po_token(visitor_data=self.visitor_data, po_token=self.pot)
+                innertube.insert_visitor_data(visitor_data=self.visitor_data)
             elif not self.use_po_token:
                 # from 01/22/2025 all clients must send the visitorData in the API request
                 innertube.insert_visitor_data(visitor_data=self.visitor_data)
@@ -917,6 +912,7 @@ class YouTube:
 
         :rtype: int
         """
+        self.check_availability()
         return int(self.vid_info.get('videoDetails', {}).get('lengthSeconds'))
 
     @property
