@@ -14,6 +14,7 @@ import logging
 import re
 
 from pytubefix.exceptions import RegexMatchError, InterpretationError
+from pytubefix.jsinterp import JSInterpreter, extract_player_js_global_var
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +29,13 @@ class Cipher:
         self._nsig_param_val = None
         self.sig_function_name = self.get_sig_function_name(js, js_url)
         self.nsig_function_name = self.get_nsig_function_name(js, js_url)
+
         self.runner_sig.load_function(self.sig_function_name)
         self.runner_nsig.load_function(self.nsig_function_name)
 
         self.calculated_n = None
+
+        self.js_interpreter = JSInterpreter(js)
 
     def get_nsig(self, n: str):
         """Interpret the function that transforms the signature parameter `n`.
@@ -150,6 +154,34 @@ class Cipher:
 
                 logger.debug(f'Failed to get Nfunc name. Pattern: {pattern}')
                 logger.debug('Extracts the function name based on the global array')
+                global_obj, varname, code = extract_player_js_global_var(js)
+                if global_obj and varname and code:
+                    logger.debug(f"Global Obj name is: {varname}")
+                    global_obj = JSInterpreter(js).interpret_expression(code, {}, 100)
+                    logger.debug("Successfully interpreted global object")
+                    for k, v in enumerate(global_obj):
+                        if v.endswith('_w8_'):
+                            logger.debug(f"_w8_ found in index {k}")
+                            pattern = r'''(?xs)
+                                    [;\n](?:
+                                        (?P<f>function\s+)|
+                                        (?:var\s+)?
+                                    )(?P<funcname>[a-zA-Z0-9_$]+)\s*(?(f)|=\s*function\s*)
+                                    \(\s*(?:[a-zA-Z0-9_$]+\s*,\s*)?(?P<argname>[a-zA-Z0-9_$]+)(?:\s*,\s*[a-zA-Z0-9_$]+)*\s*\)\s*\{
+                                    (?:(?!(?<!\{)\};(?![\]\)])).)*
+                                    \}\s*catch\(\s*[a-zA-Z0-9_$]+\s*\)\s*
+                                    \{\s*(?:return\s+|[\w=]+)%s\[%d\]\s*\+\s*(?P=argname)\s*[\};].*?\s*return\s+[^}]+\}[;\n]
+                                '''  % (re.escape(varname), k)
+                            func_name = re.search(pattern, js)
+                            if func_name:
+                                n_func = func_name.group("funcname")
+                                logger.debug(f"Nfunc name is: {n_func}")
+                                self._nsig_param_val = self._extract_nsig_param_val(js, n_func)
+                                return n_func
+
+                            raise RegexMatchError(
+                                caller="get_throttling_function_name", pattern=f"{pattern} in {js_url}"
+                            )
         except Exception as e:
             raise e
 

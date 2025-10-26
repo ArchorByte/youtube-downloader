@@ -74,7 +74,7 @@ try:
             print("Bye!")
             break # End the program.
 
-        reset = input("Do you want to use this video/playlist again? (y/n) ")
+        reset = input(f"Do you want to use this {"video" if source_type == "v" else "playlist"} again? (y/n) ")
 
         if not reset.lower() == "y":
             url = None
