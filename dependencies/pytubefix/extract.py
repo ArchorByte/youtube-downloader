@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qs, quote, urlencode, urlparse
 
-from pytubefix.cipher import Cipher
 from pytubefix.exceptions import HTMLParseError, LiveStreamError, RegexMatchError
 from pytubefix.helpers import regex_search
 from pytubefix.metadata import YouTubeMetadata
@@ -457,7 +456,6 @@ def apply_signature(stream_manifest: Dict, vid_info: Dict, js: str, url_js: str)
         Full base.js url
 
     """
-    cipher = Cipher(js=js, js_url=url_js)
     discovered_n = dict()
     for i, stream in enumerate(stream_manifest):
         try:
@@ -488,13 +486,9 @@ def apply_signature(stream_manifest: Dict, vid_info: Dict, js: str, url_js: str)
             logger.debug("signature found, skip decipher")
 
         else:
-            signature = cipher.get_sig(ciphered_signature=stream["s"])
-
             logger.debug(
                 "finished descrambling signature for itag=%s", stream["itag"]
             )
-
-            query_params['sig'] = signature
 
         if 'n' in query_params.keys():
             # For WEB-based clients, YouTube sends an "n" parameter that throttles download speed.
@@ -503,12 +497,6 @@ def apply_signature(stream_manifest: Dict, vid_info: Dict, js: str, url_js: str)
             initial_n = query_params['n']
             logger.debug(f'Parameter n is: {initial_n}')
 
-            # Check if any previous stream decrypted the parameter
-            if initial_n not in discovered_n:
-                discovered_n[initial_n] = cipher.get_nsig(initial_n)
-            else:
-                logger.debug('Parameter n found skipping decryption')
-
             new_n = discovered_n[initial_n]
             query_params['n'] = new_n
             logger.debug(f'Parameter n deciphered: {new_n}')
@@ -516,9 +504,6 @@ def apply_signature(stream_manifest: Dict, vid_info: Dict, js: str, url_js: str)
         url = f'{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}?{urlencode(query_params)}'  # noqa:E501
 
         stream_manifest[i]["url"] = url
-
-    cipher.runner_sig.close()
-    cipher.runner_nsig.close()
 
 
 def apply_descrambler(stream_data: Dict) -> Optional[List[Dict]]:
