@@ -258,11 +258,6 @@ class YouTube:
         """
         if self._pot:
             return self._pot
-        logger.debug('Running botGuard')
-        try:
-            logger.debug('PoToken generated successfully')
-        except Exception as e:
-            logger.warning('Unable to run botGuard. Skipping poToken generation, reason: ' + e.__str__())
         return self._pot
 
     @property
@@ -423,10 +418,17 @@ class YouTube:
                     raise exceptions.VideoRemovedByUploader(video_id=self.video_id, reason=reason)
                 elif reason == 'This video is no longer available because the YouTube account associated with this video has been terminated.':
                     raise exceptions.AccountTerminated(video_id=self.video_id, reason=reason)
+                elif reason == "This video has been removed for violating YouTube's Community Guidelines":
+                    raise exceptions.VideoRemovedByYouTubeForViolatingTOS(video_id=self.video_id, reason=reason)
                 else:
                     raise exceptions.UnknownVideoError(video_id=self.video_id, status=status, reason=reason, developer_message=f'Unknown reason type for Error status')
             elif status == 'LIVE_STREAM':
                 raise exceptions.LiveStreamError(video_id=self.video_id)
+            elif status == 'OK':
+                if reason == 'This live event has ended.':
+                    raise exceptions.LiveStreamEnded(video_id=self.video_id, reason=reason)
+                else:
+                    raise exceptions.UnknownVideoError(video_id=self.video_id, status=status, reason=reason, developer_message=f'Unknown video status')
             elif status is None:
                 pass
             else:
