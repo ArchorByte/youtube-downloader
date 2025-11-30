@@ -73,7 +73,7 @@ def download_progress(stream, chunk, remaining_bytes):
     empty = bar_length - filled                             # The rest of the bar is set as whitespaces.
     progress_bar = "[" + "█" * filled + " " * empty + "]"   # Render the text bar.
 
-    print(f"\rDownload progress: {percentage:.0f}% {progress_bar} ({downloaded_bytes / 1000000:.2f}MB/{file_size / 1000000:.2f}MB).", end = "", flush = True)
+    print(f"\rDownload progress: {"0" if int(percentage) < 10 else ""}{int(percentage)}% {progress_bar} ({downloaded_bytes / 1000000:.2f}MB/{file_size / 1000000:.2f}MB).", end = "", flush = True)
 
 
 # Give the ffmpeg keyword to use to start an ffmpeg command, depending on the operating system.

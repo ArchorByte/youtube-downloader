@@ -38,7 +38,7 @@ def download_audio(youtube_video, destination_path, system):
         helpers.remove_if_exists(f"./{sanitized_title}.mp3")
 
         subprocess.run([ffmpeg, "-y", "-i", f"{sanitized_title}.{file_extension}", "-ar", "44100", "-ac", "2", "-b:a", "192k",  f"{sanitized_title}.mp3"], check = True)
-        helpers.remove_if_exists(full_path)
+        helpers.remove_if_exists(f"{sanitized_title}.{file_extension}")
 
         file_extension = "mp3"
         full_path = os.path.join(download_directory, f"{sanitized_title}.mp3")
