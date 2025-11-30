@@ -258,6 +258,11 @@ class YouTube:
         """
         if self._pot:
             return self._pot
+        logger.debug('Running botGuard')
+        try:
+            logger.debug('PoToken generated successfully')
+        except Exception as e:
+            logger.warning('Unable to run botGuard. Skipping poToken generation, reason: ' + e.__str__())
         return self._pot
 
     @property
@@ -791,6 +796,18 @@ class YouTube:
         """Sets the publish date."""
         self._publish_date = value
 
+    def vid_engagement_items(self) -> list:
+        for i in range(len(self.vid_details.get('engagementPanels', []))):
+            try:
+                return self.vid_details['engagementPanels'][i]['engagementPanelSectionListRenderer']['content']['structuredDescriptionContentRenderer']['items']
+            except KeyError as e:
+                continue
+        raise exceptions.PytubeFixError(
+            (
+                f'Exception while accessing engagementPanel of {self.watch_url} in {self.client} client.'
+            )
+        ) from e
+
     @property
     def title(self) -> str:
         """Get the video title.
@@ -803,6 +820,9 @@ class YouTube:
 
         if self._title:
             return self._title
+
+        if self.use_oauth == True:
+            self._title = self.vid_engagement_items()[0]['videoDescriptionHeaderRenderer']['title']['runs'][0]['text']
 
         try:
             # Some clients may not return the title in the `player` endpoint,
@@ -883,6 +903,19 @@ class YouTube:
 
         return self._original_title
 
+    def vid_details_content(self) -> list:
+        try:
+            contents = self.vid_details['contents']
+            results = contents[list(contents.keys())[0]]['results']['results']['contents']
+        except Exception as e:
+            raise exceptions.PyTubeFixError(
+                    (
+                        f'Exception: accessing vid_details_content of {self.watch_url} in {self.client} and trying to use key in {contents.keys()}'
+                    )
+            ) from e
+        return results
+
+
     @property
     def description(self) -> str:
         """Get the video description.
@@ -890,9 +923,13 @@ class YouTube:
         :rtype: str
         """
         description = self.vid_info.get("videoDetails", {}).get("shortDescription")
+
+        if self.use_oauth == True:
+            description = self.vid_engagement_items()[2]['expandableVideoDescriptionBodyRenderer']['descriptionBodyText']['runs'][0]['text']
+
         if description is None:
             # TV client structure
-            results = self.vid_details['contents']['twoColumnWatchNextResults']['results']['results']['contents']
+            results = self.vid_details_content()
             for c in results:
                 if 'videoSecondaryInfoRenderer' in c:
                     description = c['videoSecondaryInfoRenderer']['attributedDescription']['content']
@@ -924,8 +961,13 @@ class YouTube:
         :rtype: int
         """
         view = int(self.vid_info.get("videoDetails", {}).get("viewCount", "0"))
+
+        if self.use_oauth == True:
+            simple_text = self.vid_engagement_items()[0]['videoDescriptionHeaderRenderer']['views']['simpleText']
+            view = int(''.join([char for char in simple_text if char.isdigit()]))
+
         if not view:
-            results = self.vid_details['contents']['twoColumnWatchNextResults']['results']['results']['contents']
+            results = self.vid_details_content()
             for c in results:
                 if 'videoPrimaryInfoRenderer' in c:
                     simple_text = c['videoPrimaryInfoRenderer'][
@@ -945,6 +987,10 @@ class YouTube:
 
         # TODO: Implement correctly for the TV client
         _author = self.vid_info.get("videoDetails", {}).get("author", "unknown")
+
+        if self.use_oauth == True:
+            _author = self.vid_engagement_items()[0]['videoDescriptionHeaderRenderer']['channel']['simpleText']
+
 
         self._author = _author
         return self._author
@@ -984,13 +1030,13 @@ class YouTube:
 
         :rtype: str
         """
+        
+        if self.use_oauth == True:
+            return self.vid_engagement_items()[0]['videoDescriptionHeaderRenderer']['factoid'][0]['factoidRenderer']['value']['simpleText']
+
         try:
             likes = '0'
-            contents = self.vid_details[
-                'contents'][
-                'twoColumnWatchNextResults'][
-                'results'][
-                'results']['contents']
+            contents = self.vid_details_content()
             for c in contents:
                 if 'videoPrimaryInfoRenderer' in c:
                     likes = c['videoPrimaryInfoRenderer'][
@@ -1009,8 +1055,13 @@ class YouTube:
                     break
 
             return ''.join([char for char in likes if char.isdigit()])
-        except (KeyError, IndexError):
-            return None
+        except (KeyError, IndexError) as e:
+            raise exceptions.PyTubeFixError(
+                    (
+                        f'Exception: accessing likes of {self.watch_url} in {self.client}'
+                    )
+            ) from e
+        return None
 
     @property
     def metadata(self) -> Optional[YouTubeMetadata]:
