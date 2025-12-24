@@ -1,72 +1,114 @@
 import config
 import helpers
 import os
+import pytubefix
 import shutil
+import typing
 
-# Get and display all available subtitle languages of a YouTube video.
-def display_subtitles_list(youtube_video):
+def display_subtitles_list (
+    youtube_video: pytubefix.YouTube
+) -> list:
+    """
+    Get and display all available subtitle languages of a YouTube video.
+
+    Tasks:
+        1) Verify the amount of captions available.
+        2) Display and save all available subtitles.
+
+    Parameters:
+        - youtube_video / YouTube / Targeted YouTube video.
+
+    Returns:
+        A list containing all available subtitle languages.
+    """
+
     available_subtitles = []
-    show_subtitles = ""
-    i = 0
+
+    if len(youtube_video.captions) < 1:
+        return available_subtitles
+    else:
+        print("\nAvailable subtitle languages:")
 
     for subtitle in youtube_video.captions:
-        show_subtitles = f"{show_subtitles}\n- '{subtitle.code}' for {subtitle.name}."
         available_subtitles.append(subtitle.code)
-        i += 1
+        print(f"- '{subtitle.code}' for {subtitle.name}.")
 
-    if i == 0:
-        show_subtitles = "No subtitles available."
-
-    print(f"\nAvailable subtitle languages: {show_subtitles}", end = "\n\n")
     return available_subtitles
 
 
-# Download the subtitles of a YouTube video.
-# The destination can be set to None to let the normal system running.
-# Otherwise, it will automate the download process.
-def download_subtitles(youtube_video, destination):
+def download_subtitles (
+    youtube_video:    pytubefix.YouTube,
+    destination_path: typing.Optional[str],
+    language:         typing.Optional[str]
+) -> None:
+    """
+    Download the subtitles of a YouTube video.
+
+    Tasks:
+        1) Verify the destination path value.
+        2) Display available subtitles.
+        3) Verify the language value.
+        4) Write the subtitles into a .srt file.
+        5) Move the file to the destination folder if necessary.
+
+    Parameters:
+        - youtube_video    / YouTube    / Targeted YouTube video.
+        - destination_path / str | None / Targeted directory for the download. If None, we give an input to the user.
+        - language         / str | None / Targeted language for the subtitles. If None, we give an input to the user.
+
+    Returns:
+        No object returned.
+    """
+
     app_config = config.get_config_data()
-    default_subtitle_lang = app_config.get("default_subtitle_lang", "a.en")
+    app_directory_path = os.getcwd()
+    default_lang = app_config.get("default_subtitle_lang", "a.en")
+    sanitized_title = helpers.remove_invalid_characters(youtube_video.title)
 
-    if destination == None:
-        download_directory = helpers.folder_input()
-    else:
-        download_directory = destination if os.path.isdir(destination) else "./"
+    if destination_path == None:
+        destination_path = helpers.folder_input()
+    elif not os.path.isdir(destination_path):
+        destination_path = app_directory_path
+        print(f"Warning: Modified destination path to {destination_path} as the provided one wasn't valid!\n")
 
-    available_subtitles = display_subtitles_list(youtube_video)                       # List and display all subtitle languages available.
-    default_allowed = True if default_subtitle_lang in available_subtitles else False # Determine if the default subtitle language can be used for this video.
+    available_subtitles = display_subtitles_list(youtube_video)
+    destination_path = os.path.abspath(destination_path) # Sanitize the destination path.
+    default_available = True if default_lang in available_subtitles else False
 
     if len(available_subtitles) < 1:
-        print("No subtitles available for this video!")
+        print("Download failed! No subtitles available for this video!")
         return
+    else:
+        print() # UI format.
 
-    while True:
-        # Propose to use the "enter nothing" option to select the default language only if it's allowed.
-        lang = input(f"Choose a subtitle language (enter nothing to select {default_subtitle_lang}): ") if default_allowed else input("Choose a subtitle language: ")
-        lang = default_subtitle_lang if default_allowed and not lang else lang
+    if language == None:
+        while True:
+            language = input(f"Choose a subtitle language (enter nothing to select {default_lang}): ") if default_available else input("Choose a subtitle language: ")
+            language = default_lang if default_available and not language else language
 
-        if lang not in available_subtitles:
+            if language in available_subtitles:
+                break
+
             print(f"Unavailable language! Please, try again.", end = "\n\n")
+    elif language not in available_subtitles:
+        if default_available:
+            language = default_lang
+        elif "en" in available_subtitles:
+            language = "en"
+        elif "a.en" in available_subtitles:
+            language = "a.en"
         else:
-            print("\nPreparing your download.. Download speed depends on your internet connection.");
-            break
+            language = available_subtitles[0]
 
-    subtitles = youtube_video.captions[lang]         # Retrieve the subtitle using the language code.
-    subtitle_srt = subtitles.generate_srt_captions() # Get the subtitles in the SRT format.
+        print(f"Warning: Modified subtitles language to {language} as the provided one wasn't available!")
 
-    title = helpers.remove_invalid_characters(youtube_video.title)
-    full_path = os.path.join(download_directory, f"{title}.srt")
+    print("\nPreparing your download.. Download speed depends on your internet connection.");
+    subtitles = youtube_video.captions[language].generate_srt_captions()
 
-    helpers.remove_if_exists(f"{title}.srt")
-    helpers.remove_if_exists(full_path)
+    with open(f"{sanitized_title}.srt", "w") as file:
+        file.write(subtitles)
 
-    # Create the SRT file that will contain the subtitles.
-    with open(f"{title}.srt", "w") as file:
-        file.write(subtitle_srt)
-        file.close() # Free the file.
+    if destination_path != app_directory_path:
+        shutil.move(f"{sanitized_title}.srt", destination_path)
 
-    # Move the file in the folder selected by the user if specified.
-    if not download_directory == "./":
-        shutil.move(f"./{title}.srt", download_directory)
-
-    print(f"Download finished: \"{full_path}\"")
+    print(f"Download finished: \"{destination_path}/{sanitized_title}.srt\"")

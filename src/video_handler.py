@@ -1,13 +1,31 @@
-import datetime
-import config
-import video_download
 import audio_download
+import config
+import datetime
+import pytubefix
 import subtitles_download
 import thumbnail_download
+import video_download
 
-# Get and display the info of a YouTube video.
-def video_info_scrapper(youtube_video):
+def video_information_scrapper (
+    youtube_video: pytubefix.YouTube
+) -> None:
+    """
+    Get and display the information of a YouTube video.
+
+    Tasks:
+        1) Retrieve all relevant information of a YouTube video.
+        2) Check the age restriction.
+        3) Display the information.
+
+    Parameters:
+        - youtube_video / YouTube / Targeted YouTube video.
+
+    Returns:
+        No object returned.
+    """
+
     app_config = config.get_config_data()
+    age_restriction = app_config.get("block_age_restricted_content", True)
 
     video_title = youtube_video.title
     video_id = youtube_video.video_id
@@ -19,9 +37,8 @@ def video_info_scrapper(youtube_video):
     video_views_count = youtube_video.views
     duration = datetime.timedelta(seconds = youtube_video.length) # Convert the duration from seconds to hours:minutes:seconds.
 
-    # Block the video download if it's age restricted and disallowed by the config.
-    if age_restricted and app_config.get("block_age_restricted_content"):
-        print("You can't download this YouTube video because it's age restricted!\nTo disable the age restricted content blockage, update your config.json file!")
+    if age_restricted and age_restriction:
+        print("You can't download this YouTube video because it's age restricted!\nTo disable the age restricted content blockage, update the config.json file!")
         input("Press [Enter] to continue.. ")
         pass
 
@@ -37,13 +54,29 @@ def video_info_scrapper(youtube_video):
     print(f"- Duration: {duration}.")
 
 
-# YouTube video download handler.
-def download_video_handler(youtube_video, option, system):
+def download_video_handler (
+    youtube_video: pytubefix.YouTube,
+    option:        int
+) -> None:
+    """
+    Handler of the YouTube video downloads.
+
+    Tasks:
+        1) Select an action to do depending on the option selected.
+
+    Parameters:
+        - youtube_video / YouTube / Targeted YouTube video.
+        - option        / int     / Targeted action to do.
+
+    Returns:
+        No object returned.
+    """
+
     if option == "1":
-        video_download.download_video(youtube_video, system, None, None)
+        video_download.download_video(youtube_video, None, None)
     elif option == "2":
-        audio_download.download_audio(youtube_video, None, system)
+        audio_download.download_audio(youtube_video, None)
     elif option == "3":
-        subtitles_download.download_subtitles(youtube_video, None)
+        subtitles_download.download_subtitles(youtube_video, None, None)
     else:
         thumbnail_download.download_thumbnail(youtube_video.thumbnail_url, youtube_video.title, None)
