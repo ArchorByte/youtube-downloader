@@ -47,7 +47,7 @@ class Caption:
     @property
     def json_captions(self) -> dict:
         """Download and parse the json caption tracks."""
-        if 'ftm=' in self.url:
+        if 'fmt=' in self.url:
             json_captions_url = self.url.replace('fmt=srv3', 'fmt=json3')
         else:
             json_captions_url = f'{self.url}&fmt=json3'
@@ -63,7 +63,7 @@ class Caption:
         recompiles them into the "SubRip Subtitle" format.
         """
         return self.xml_caption_to_srt(self.xml_captions)
-        
+
     def generate_txt_captions(self) -> str:
         """Generate Text captions.
 
@@ -77,7 +77,7 @@ class Caption:
                re.search('^[0-9]{2}:[0-9]{2}:[0-9]{2}', line) is None and \
                re.search('^$', line) is None:
                 text += ' ' + line.strip()
-            text = text.lstrip()  
+            text = text.lstrip()
         return text.strip()
 
     def save_captions(self, filename: str):
