@@ -70,13 +70,13 @@ class Stream:
 
         # filesize in bytes
         self._filesize: Optional[int] = int(stream.get('contentLength', 0))
-        
+
         # filesize in kilobytes
         self._filesize_kb: Optional[float] = float(ceil(float(stream.get('contentLength', 0)) / 1024 * 1000) / 1000)
-        
+
         # filesize in megabytes
         self._filesize_mb: Optional[float] = float(ceil(float(stream.get('contentLength', 0)) / 1024 / 1024 * 1000) / 1000)
-        
+
         # filesize in gigabytes(fingers crossed we don't need terabytes going forward though)
         self._filesize_gb: Optional[float] = float(ceil(float(stream.get('contentLength', 0)) / 1024 / 1024 / 1024 * 1000) / 1000)
 
@@ -110,7 +110,7 @@ class Stream:
             self.audio_track_name_regionalized = str(stream['audioTrack']['displayName']).replace(" original", "")
             self.audio_track_name = self.audio_track_name_regionalized.split(" ")[0]
             self.audio_track_language_id_regionalized= str(stream['audioTrack']['id']).split(".")[0]
-            self.audio_track_language_id= self.audio_track_language_id_regionalized.split("-")[0] 
+            self.audio_track_language_id= self.audio_track_language_id_regionalized.split("-")[0]
         else:
             self.is_default_audio_track = self.includes_audio_track and not self.includes_video_track
             self.audio_track_name_regionalized = None
@@ -223,7 +223,7 @@ class Stream:
                     raise
                 self._filesize = request.seq_filesize(self.url)
         return self._filesize
-    
+
     @property
     def filesize_kb(self) -> float:
         """File size of the media stream in kilobytes.
@@ -240,7 +240,7 @@ class Stream:
                     raise
                 self._filesize_kb = float(ceil(request.seq_filesize(self.url)/1024 * 1000) / 1000)
         return self._filesize_kb
-    
+
     @property
     def filesize_mb(self) -> float:
         """File size of the media stream in megabytes.
@@ -274,7 +274,7 @@ class Stream:
                     raise
                 self._filesize_gb = float(ceil(request.seq_filesize(self.url)/1024/1024/1024 * 1000) / 1000)
         return self._filesize_gb
-    
+
     @property
     def title(self,) -> str:
         """Get title of video
@@ -317,7 +317,7 @@ class Stream:
         """
         if 'audio' in self.mime_type and 'video' not in self.mime_type:
             self.subtype = "m4a"
-        
+
         return f"{self.title}.{self.subtype}"
 
     def download(
@@ -330,7 +330,6 @@ class Stream:
         max_retries: int = 0,
         interrupt_checker: Optional[Callable[[], bool]] = None
     ) -> Optional[str]:
-        
         """
         Downloads a file from the URL provided by `self.url` and saves it locally with optional configurations.
 
@@ -354,7 +353,7 @@ class Stream:
             - The `interrupt_checker` allows for the download to be halted cleanly if certain conditions are met during the download process.
             - Download progress can be monitored using the `on_progress` callback, and the `on_complete` callback is triggered once the download is finished.
         """
-   
+
         kernel = sys.platform
 
         if kernel == "linux":
@@ -362,8 +361,8 @@ class Stream:
         elif kernel == "darwin":
             file_system = "APFS"
         else:
-            file_system = "NTFS"  
-                
+            file_system = "NTFS"
+
         translation_table = file_system_verify(file_system)
 
         if filename is None:

@@ -366,7 +366,7 @@ class Search:
         if filters:
             logger.debug("Filters found, starting combination")
 
-            # TODO: 
+            # TODO:
             if isinstance(filters, dict):
                 logging.warning("This filter implementation is obsolete and will be removed soon. "
                                 "Please refer to the documentation for the new implementation. "

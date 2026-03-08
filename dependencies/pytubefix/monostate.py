@@ -8,7 +8,7 @@ class Monostate:
                 title: Optional[str] = None,
                 duration: Optional[int] = None,
                 youtube = None):
-        
+
         self.on_progress = on_progress
         self.on_complete = on_complete
         self.title = title

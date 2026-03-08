@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def build_playback_report(youtube: YouTube) -> None:
     """Serialize the request data to json for offline debugging.
-    
+
     :param YouTube youtube:
         A YouTube object.
     """
@@ -92,7 +92,7 @@ def _unique_name(base: str, subtype: str, media_type: str, target: str) -> str:
     """
     Given a base name, the file format, and the target directory, will generate
     a filename unique for that directory and file format.
-    
+
     :param str base:
         The given base-name.
     :param str subtype:
@@ -300,7 +300,7 @@ def _perform_args_on_youtube(youtube: YouTube, args: argparse.Namespace) -> None
         download_by_resolution(youtube=youtube, resolution=args.resolution, target=args.target)
     elif args.audio:
         download_audio(youtube=youtube, filetype=args.audio, target=args.target)
-    
+
     if args.ffmpeg:
         ffmpeg_process(youtube=youtube, resolution=args.resolution, target=args.target)
 

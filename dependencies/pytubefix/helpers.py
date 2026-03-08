@@ -345,18 +345,18 @@ def reset_cache(verbose: bool = False):
     """
     Deletes the `__cache__` directory to reset the cache.
 
-    This function checks if the `__cache__` directory exists in the same directory 
-    as the script. If it exists and is a directory, it deletes it along with its contents. 
-    If the directory does not exist, it logs a message indicating that the cache directory 
+    This function checks if the `__cache__` directory exists in the same directory
+    as the script. If it exists and is a directory, it deletes it along with its contents.
+    If the directory does not exist, it logs a message indicating that the cache directory
     is not present.
 
     Parameters:
         verbose (bool): If True, sets up logging at the DEBUG level. Default is False.
 
     Behavior:
-        - When `verbose` is True, debug messages are logged, providing information about 
+        - When `verbose` is True, debug messages are logged, providing information about
           the existence and status of the cache directory.
-        - If `verbose` is False, no logging configuration is modified, and debug messages 
+        - If `verbose` is False, no logging configuration is modified, and debug messages
           may not be shown unless logging is already configured externally.
 
     Example:
@@ -366,7 +366,7 @@ def reset_cache(verbose: bool = False):
     Raises:
         None
     """
-    
+
     cache_dir = os.path.join(os.path.dirname(__file__), '__cache__')
 
     if verbose:
