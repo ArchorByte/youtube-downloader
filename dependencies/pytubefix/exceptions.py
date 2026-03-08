@@ -368,7 +368,7 @@ class AgeRestrictedError(VideoUnavailable):
         """
         self.video_id = video_id
         super().__init__(self.video_id)
-    
+
     @property
     def error_string(self):
         return f"{self.video_id} is age restricted, and can't be accessed without logging in."
