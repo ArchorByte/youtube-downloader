@@ -229,20 +229,20 @@ def linux_installation () -> None:
     package_manager = detect_linux_package_manager()
 
     if package_manager == DPKG:
-        os.system("sudo apt install ffmpeg -y")
+        subprocess.run(["sudo", "apt", "install", "ffmpeg", "-y"], check = True)
     elif package_manager == RPM:
         try:
-            os.system("sudo dnf -y install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm")
-            os.system("sudo dnf -y install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm")
-            os.system("sudo dnf install ffmpeg -y")
+            subprocess.run("sudo dnf -y install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm", shell = True, check = True)
+            subprocess.run("sudo dnf -y install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm", shell = True, check = True)
+            subprocess.run(["sudo", "dnf", "install", "ffmpeg", "-y"], check = True)
         except: # If the DNF command failed, we try again using YUM.
-            os.system("sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm")
-            os.system("sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm")
-            os.system("sudo yum install ffmpeg -y")
+            subprocess.run("sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm", shell = True)
+            subprocess.run("sudo yum localinstall --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm", shell = True)
+            subprocess.run(["sudo", "yum", "install", "ffmpeg", "-y"], check = True)
     elif package_manager == PACMAN:
-        os.system("sudo pacman -S ffmpeg")
+        subprocess.run(["sudo", "pacman", "-S", "ffmpeg"], check = True)
     elif package_manager == SNAP:
-        os.system("sudo snap install ffmpeg")
+        subprocess.run(["sudo", "snap", "install", "ffmpeg"], check = True)
     else:
         raise ValueError("Unsupported package manager provided!")
 
@@ -279,11 +279,11 @@ def macos_installation () -> None:
         if authorization.lower() != "y":
             raise ValueError("Homebrew installation aborted by the user!")
 
-        os.system("/bin/bash -c '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)'")
+        subprocess.run("/bin/bash -c $(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)", shell = True, check = True)
         print("Homebrew installation completed!", end = "\n\n")
 
     print("Installing FFmpeg..")
-    os.system("brew install ffmpeg")
+    subprocess.run(["brew", "install", "ffmpeg"], check = True)
     print("FFmpeg installation completed! Enjoy!", end = "\n\n")
 
 

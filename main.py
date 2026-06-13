@@ -1,4 +1,6 @@
 import os
+import platform
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "dependencies")) # Load bundled dependencies.
@@ -6,7 +8,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))          # Lo
 
 import config
 import ffmpeg
-import platform
 import playlist_handler
 import pytubefix
 import video_handler
@@ -52,7 +53,7 @@ def main () -> None:
         ffmpeg.install()
 
     while True:
-        os.system("cls" if system == "Windows" else "clear")
+        subprocess.call(["cls"] if system == "Windows" else ["clear"])
 
         if url == None:
             url = input("YouTube video or playlist link: ")

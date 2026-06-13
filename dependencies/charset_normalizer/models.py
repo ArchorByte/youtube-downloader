@@ -12,7 +12,7 @@ from .utils import iana_name, is_multi_byte_encoding, unicode_range
 class CharsetMatch:
     def __init__(
         self,
-        payload: bytes,
+        payload: bytes | bytearray,
         guessed_encoding: str,
         mean_mess_ratio: float,
         has_sig_or_bom: bool,
@@ -20,7 +20,7 @@ class CharsetMatch:
         decoded_payload: str | None = None,
         preemptive_declaration: str | None = None,
     ):
-        self._payload: bytes = payload
+        self._payload: bytes | bytearray = payload
 
         self._encoding: str = guessed_encoding
         self._mean_mess_ratio: float = mean_mess_ratio
@@ -55,10 +55,10 @@ class CharsetMatch:
         chaos_difference: float = abs(self.chaos - other.chaos)
         coherence_difference: float = abs(self.coherence - other.coherence)
 
-        # Below 1% difference --> Use Coherence
-        if chaos_difference < 0.01 and coherence_difference > 0.02:
+        # Below 0.5% difference --> Use Coherence
+        if chaos_difference < 0.005 and coherence_difference > 0.02:
             return self.coherence > other.coherence
-        elif chaos_difference < 0.01 and coherence_difference <= 0.02:
+        elif chaos_difference < 0.005 and coherence_difference <= 0.02:
             # When having a difficult decision, use the result that decoded as many multi-byte as possible.
             # preserve RAM usage!
             if len(self._payload) >= TOO_BIG_SEQUENCE:
@@ -75,6 +75,16 @@ class CharsetMatch:
         # Lazy Str Loading
         if self._string is None:
             self._string = str(self._payload, self._encoding, "strict")
+            # UTF-7 BOM is encoded in modified Base64 whose byte boundary
+            # can overlap with the next character, so raw-byte stripping
+            # is unreliable. Strip the decoded BOM character instead.
+            if (
+                self._has_sig_or_bom
+                and self._encoding == "utf_7"
+                and self._string
+                and self._string[0] == "\ufeff"
+            ):
+                self._string = self._string[1:]
         return self._string
 
     def __repr__(self) -> str:
@@ -171,7 +181,7 @@ class CharsetMatch:
         return round(self.coherence * 100, ndigits=3)
 
     @property
-    def raw(self) -> bytes:
+    def raw(self) -> bytes | bytearray:
         """
         Original untouched bytes.
         """

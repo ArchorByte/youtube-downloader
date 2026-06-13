@@ -560,7 +560,7 @@ class InnerTube:
             Defaults to None, which means the tokens will be stored in the pytubefix/__cache__ directory.
         :param Callable oauth_verifier:
             (Optional) Verifier to be used for getting outh tokens.
-            Verification URL and User-Code will be passed to it respectively.
+            Verification URL and User-Code will be passed to it respectively. 
             (if passed, else default verifier will be used)
         :param bool use_po_token:
             (Optional) Whether or not to use po_token to bypass YouTube bot detector.
